@@ -12,7 +12,7 @@ class DocentesViewsTests(TestCase):
     def test_docente_puede_iniciar_sesion_y_ver_panel(self):
         respuesta = self.client.post(
             reverse("login"),
-            {"cuenta": "ejemplo@demo.cl", "rut": "12345678-9"},
+            {"cuenta": "docentes@colegiodigital.cl", "rut": "12345678-9"},
         )
 
         self.assertRedirects(respuesta, reverse("listado_docentes"))
@@ -21,7 +21,7 @@ class DocentesViewsTests(TestCase):
     def test_docente_no_puede_abrir_areas_de_otro_rol(self):
         self.client.post(
             reverse("login"),
-            {"cuenta": "ejemplo@demo.cl", "rut": "12345678-9"},
+            {"cuenta": "docentes@colegiodigital.cl", "rut": "12345678-9"},
         )
 
         destino = reverse("listado_docentes")

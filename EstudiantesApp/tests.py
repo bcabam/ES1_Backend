@@ -6,7 +6,7 @@ class LoginEstudianteTests(TestCase):
     def test_estudiante_puede_iniciar_sesion_y_ver_notas(self):
         respuesta = self.client.post(
             reverse("estudiantes:login"),
-            {"correo": "JUAN@CORREO.CL", "password": "123456"},
+            {"correo": "ESTUDIANTES@COLEGIODIGITAL.CL", "password": "123456"},
         )
 
         self.assertRedirects(respuesta, reverse("estudiantes:notas"))
@@ -17,7 +17,7 @@ class LoginEstudianteTests(TestCase):
     def test_credenciales_invalidas_muestran_error(self):
         respuesta = self.client.post(
             reverse("estudiantes:login"),
-            {"correo": "juan@correo.cl", "password": "incorrecta"},
+            {"correo": "estudiantes@colegiodigital.cl", "password": "incorrecta"},
         )
 
         self.assertContains(respuesta, "Correo o contraseña incorrectos.")
@@ -30,7 +30,7 @@ class LoginEstudianteTests(TestCase):
     def test_cerrar_sesion_elimina_la_sesion(self):
         self.client.post(
             reverse("estudiantes:login"),
-            {"correo": "juan@correo.cl", "password": "123456"},
+            {"correo": "estudiantes@colegiodigital.cl", "password": "123456"},
         )
 
         respuesta = self.client.post(reverse("estudiantes:logout"))
@@ -41,7 +41,7 @@ class LoginEstudianteTests(TestCase):
     def test_estudiante_no_puede_abrir_areas_de_docentes_o_administrativos(self):
         self.client.post(
             reverse("estudiantes:login"),
-            {"correo": "juan@correo.cl", "password": "123456"},
+            {"correo": "estudiantes@colegiodigital.cl", "password": "123456"},
         )
 
         destino = reverse("estudiantes:notas")

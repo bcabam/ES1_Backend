@@ -18,7 +18,7 @@ class AdministrativosViewsTests(TestCase):
     def test_administrativo_no_puede_acceder_a_otra_area(self, _check_password):
         respuesta_login = self.client.post(
             reverse("administrativos:login"),
-            {"usuario": "admin", "contrasena": "secreto"},
+            {"correo": "administrativos@colegiodigital.cl", "contrasena": "secreto"},
         )
 
         self.assertRedirects(respuesta_login, reverse("administrativos:inicio"))
