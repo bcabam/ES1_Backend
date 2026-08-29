@@ -6,14 +6,18 @@ from django.contrib import messages
 from django.contrib.auth.hashers import check_password, make_password
 from django.shortcuts import redirect, render
 
+from config.autorizacion import redirigir_si_hay_sesion, requiere_rol
+
 RUTA_DATOS_FUNCIONARIOS = Path(settings.BASE_DIR) / 'datos' / 'funcionarios.json'
 RUTA_DATOS_USUARIOS = Path(settings.BASE_DIR) / 'datos' / 'usuarios.json'
 
 
+@requiere_rol('administrativo')
 def inicio_administrativos(request):
     return render(request, 'AdministrativosApp/inicio.html')
 
 
+@requiere_rol('administrativo')
 def listar_funcionarios(request):
     with open(RUTA_DATOS_FUNCIONARIOS, 'r', encoding='utf-8') as archivo:
         datos_funcionarios = json.load(archivo)
@@ -38,6 +42,7 @@ def _guardar_usuarios(datos_usuarios):
         json.dump(datos_usuarios, archivo, ensure_ascii=False, indent=4)
 
 
+@requiere_rol('administrativo')
 def registro_usuario(request):
     if request.method == 'POST':
         usuario = request.POST.get('usuario', '').strip()
@@ -67,6 +72,10 @@ def registro_usuario(request):
 
 
 def iniciar_sesion(request):
+    redireccion = redirigir_si_hay_sesion(request)
+    if redireccion:
+        return redireccion
+
     if request.method == 'POST':
         usuario = request.POST.get('usuario', '').strip()
         contrasena = request.POST.get('contrasena', '')
@@ -75,6 +84,8 @@ def iniciar_sesion(request):
         usuario_encontrado = next((u for u in datos_usuarios if u['usuario'] == usuario), None)
 
         if usuario_encontrado and check_password(contrasena, usuario_encontrado['contrasena_hash']):
+            request.session.flush()
+            request.session['rol'] = 'administrativo'
             request.session['usuario_actual'] = usuario_encontrado['usuario']
             request.session['nombre_actual'] = usuario_encontrado['nombre']
             messages.success(request, f"Bienvenido, {usuario_encontrado['nombre']}.")

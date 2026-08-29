@@ -1,9 +1,10 @@
 import json
 import re
-from functools import wraps
 from pathlib import Path
 
 from django.shortcuts import redirect, render
+
+from config.autorizacion import redirigir_si_hay_sesion, requiere_rol
 
 
 DATA_DIR = Path(__file__).resolve().parent / 'data'
@@ -20,20 +21,14 @@ def normalizar_rut(rut):
     return re.sub(r'[^0-9Kk]', '', str(rut)).upper()
 
 
-def docente_requerido(vista):
-    """Restringe las vistas del docente a una sesión iniciada."""
-    @wraps(vista)
-    def envoltura(request, *args, **kwargs):
-        if 'docente' not in request.session:
-            return redirect('login')
-        return vista(request, *args, **kwargs)
-    return envoltura
+docente_requerido = requiere_rol('docente')
 
 
 def iniciar_sesion(request):
     """Valida la cuenta y el RUT definidos en docentes.json."""
-    if 'docente' in request.session:
-        return redirect('listado_docentes')
+    redireccion = redirigir_si_hay_sesion(request)
+    if redireccion:
+        return redireccion
 
     error = None
     if request.method == 'POST':
@@ -48,6 +43,8 @@ def iniciar_sesion(request):
             None,
         )
         if docente:
+            request.session.flush()
+            request.session['rol'] = 'docente'
             request.session['docente'] = {
                 'nombre': docente['nombre'],
                 'cuenta': docente['cuenta'],
@@ -68,7 +65,8 @@ def cerrar_sesion(request):
 
 
 def inicio(request):
-    return redirect('login')
+    redireccion = redirigir_si_hay_sesion(request)
+    return redireccion or redirect('login')
 
 
 @docente_requerido

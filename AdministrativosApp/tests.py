@@ -1,15 +1,27 @@
 from django.test import TestCase
 from django.urls import reverse
+from unittest.mock import patch
 
 
 class AdministrativosViewsTests(TestCase):
-    def test_vistas_administrativas_estan_disponibles(self):
-        respuesta_inicio = self.client.get(reverse("administrativos:inicio"))
-        respuesta_login = self.client.get(reverse("administrativos:login"))
-        respuesta_funcionarios = self.client.get(
-            reverse("administrativos:listar_funcionarios")
+    def test_vistas_administrativas_requieren_rol(self):
+        self.assertRedirects(
+            self.client.get(reverse("administrativos:inicio")),
+            reverse("administrativos:login"),
+        )
+        self.assertRedirects(
+            self.client.get(reverse("administrativos:registro")),
+            reverse("administrativos:login"),
         )
 
+    @patch("AdministrativosApp.views.check_password", return_value=True)
+    def test_administrativo_no_puede_acceder_a_otra_area(self, _check_password):
+        respuesta_login = self.client.post(
+            reverse("administrativos:login"),
+            {"usuario": "admin", "contrasena": "secreto"},
+        )
+
+        self.assertRedirects(respuesta_login, reverse("administrativos:inicio"))
+        respuesta_inicio = self.client.get(reverse("administrativos:inicio"))
         self.assertContains(respuesta_inicio, "Área Administrativa")
-        self.assertContains(respuesta_login, "Iniciar sesión")
-        self.assertContains(respuesta_funcionarios, "Funcionarios")
+        self.assertRedirects(self.client.get(reverse("login")), reverse("administrativos:inicio"))

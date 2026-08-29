@@ -17,3 +17,15 @@ class DocentesViewsTests(TestCase):
 
         self.assertRedirects(respuesta, reverse("listado_docentes"))
         self.assertContains(self.client.get(reverse("listado_docentes")), "Panel de información académica")
+
+    def test_docente_no_puede_abrir_areas_de_otro_rol(self):
+        self.client.post(
+            reverse("login"),
+            {"cuenta": "ejemplo@demo.cl", "rut": "12345678-9"},
+        )
+
+        destino = reverse("listado_docentes")
+        self.assertRedirects(self.client.get(reverse("estudiantes:login")), destino)
+        self.assertRedirects(
+            self.client.get(reverse("administrativos:inicio")), destino
+        )

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block titulo %}Iniciar sesión - Colegio Digital{% endblock %}
-{% block encabezado %}Iniciar sesión{% endblock %}
+{% block encabezado %}Iniciar sesión administrativa{% endblock %}
 
 {% block contenido %}
 <div class="row justify-content-center">
@@ -10,17 +10,13 @@
             {% csrf_token %}
             <div class="mb-3">
                 <label for="usuario" class="form-label">Usuario</label>
-                <input type="text" class="form-control" id="usuario" name="usuario" required>
+                <input type="text" class="form-control" id="usuario" name="usuario" required autofocus autocomplete="username">
             </div>
             <div class="mb-3">
                 <label for="contrasena" class="form-label">Contraseña</label>
-                <input type="password" class="form-control" id="contrasena" name="contrasena" required>
+                <input type="password" class="form-control" id="contrasena" name="contrasena" required autocomplete="current-password">
             </div>
             <button type="submit" class="btn btn-primary w-100">Ingresar</button>
-            <p class="text-center mt-3 mb-0">
-                ¿No tienes cuenta?
-                <a href="{% url 'administrativos:registro' %}">Regístrate aquí</a>
-            </p>
         </form>
     </div>
 </div>

@@ -17,9 +17,18 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarPrincipal">
         <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:inicio' %}">Administrativos</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Docentes</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'estudiantes:login' %}">Estudiantes</a></li>
+          {% if request.session.rol == 'administrativo' %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:inicio' %}">Administrativos</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:listar_funcionarios' %}">Funcionarios</a></li>
+          {% elif request.session.rol == 'docente' %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'listado_docentes' %}">Mi panel docente</a></li>
+          {% elif request.session.rol == 'estudiante' %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'estudiantes:notas' %}">Mis notas</a></li>
+          {% else %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:login' %}">Administrativos</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Docentes</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'estudiantes:login' %}">Estudiantes</a></li>
+          {% endif %}
         </ul>
         <ul class="navbar-nav align-items-lg-center">
           {% if request.session.usuario_actual %}
@@ -41,7 +50,6 @@
             </li>
           {% else %}
             <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:login' %}">Iniciar sesión</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:registro' %}">Registrarse</a></li>
           {% endif %}
         </ul>
       </div>

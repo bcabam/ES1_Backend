@@ -37,3 +37,16 @@ class LoginEstudianteTests(TestCase):
 
         self.assertRedirects(respuesta, reverse("estudiantes:login"))
         self.assertNotIn("usuario_id", self.client.session)
+
+    def test_estudiante_no_puede_abrir_areas_de_docentes_o_administrativos(self):
+        self.client.post(
+            reverse("estudiantes:login"),
+            {"correo": "juan@correo.cl", "password": "123456"},
+        )
+
+        destino = reverse("estudiantes:notas")
+        self.assertRedirects(self.client.get(reverse("listado_docentes")), destino)
+        self.assertRedirects(
+            self.client.get(reverse("administrativos:inicio")), destino
+        )
+        self.assertRedirects(self.client.get(reverse("login")), destino)

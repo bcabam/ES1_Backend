@@ -4,6 +4,8 @@ from pathlib import Path
 from django.contrib import messages
 from django.shortcuts import redirect, render
 
+from config.autorizacion import redirigir_si_hay_sesion, requiere_rol
+
 
 def cargar_usuarios():
     ruta = Path(__file__).resolve().parent / "data" / "usuarios.json"
@@ -18,8 +20,9 @@ def cargar_notas():
 
 
 def login(request):
-    if request.session.get("usuario_id"):
-        return redirect("estudiantes:notas")
+    redireccion = redirigir_si_hay_sesion(request)
+    if redireccion:
+        return redireccion
 
     if request.method == "POST":
         correo = request.POST.get("correo", "").strip().lower()
@@ -37,7 +40,8 @@ def login(request):
                     )
                     return redirect("estudiantes:login")
 
-                request.session.cycle_key()
+                request.session.flush()
+                request.session["rol"] = "estudiante"
                 request.session["usuario_id"] = usuario["id"]
                 request.session["nombre_usuario"] = usuario["nombre"]
                 return redirect("estudiantes:notas")
@@ -47,10 +51,9 @@ def login(request):
     return render(request, "estudiantes/login.html")
 
 
+@requiere_rol("estudiante")
 def notas(request):
-    nombre_usuario = request.session.get("nombre_usuario")
-    if not nombre_usuario:
-        return redirect("estudiantes:login")
+    nombre_usuario = request.session["nombre_usuario"]
 
     return render(
         request,
