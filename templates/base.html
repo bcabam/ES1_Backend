@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Colegio Digital{% endblock %}</title>
+  <title>{% block title %}{% block titulo %}Colegio Digital{% endblock %}{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/estilos_colegio.css' %}">
 </head>
@@ -17,11 +17,16 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarPrincipal">
         <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:inicio' %}">Administrativos</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Docentes</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'estudiantes:login' %}">Estudiantes</a></li>
         </ul>
         <ul class="navbar-nav align-items-lg-center">
-          {% if request.session.docente %}
+          {% if request.session.usuario_actual %}
+            <li class="nav-item"><span class="navbar-text me-lg-3">Hola, {{ request.session.nombre_actual }}</span></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:listar_funcionarios' %}">Funcionarios</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:logout' %}">Cerrar sesión</a></li>
+          {% elif request.session.docente %}
             <li class="nav-item"><span class="navbar-text me-lg-3">Hola, {{ request.session.docente.nombre }}</span></li>
             <li class="nav-item"><a class="nav-link" href="{% url 'listado_docentes' %}">Mi panel</a></li>
             <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Cerrar sesión</a></li>
@@ -34,6 +39,9 @@
                 <button type="submit" class="btn btn-link nav-link border-0">Cerrar sesión</button>
               </form>
             </li>
+          {% else %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:login' %}">Iniciar sesión</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:registro' %}">Registrarse</a></li>
           {% endif %}
         </ul>
       </div>
@@ -41,7 +49,7 @@
   </nav>
 
   <header class="bg-primary text-white text-center py-4">
-    <div class="container"><h1 class="h2 mb-0">{% block heading %}Colegio Digital{% endblock %}</h1></div>
+    <div class="container"><h1 class="h2 mb-0">{% block heading %}{% block encabezado %}Colegio Digital{% endblock %}{% endblock %}</h1></div>
   </header>
 
   <main class="container my-4 flex-grow-1 {% block main_class %}{% endblock %}">

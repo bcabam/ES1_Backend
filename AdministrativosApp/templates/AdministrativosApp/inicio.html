@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Administrativos - Colegio Digital{% endblock %}
+{% block encabezado %}Área Administrativa{% endblock %}
+
+{% block contenido %}
+<div class="row align-items-center">
+    <div class="col-md-6">
+        <h2>Bienvenido al área Administrativa</h2>
+        <p class="lead">
+            Aquí encontrarás la información del personal administrativo del colegio:
+            cargos, departamentos y datos de contacto.
+        </p>
+        <a href="{% url 'administrativos:listar_funcionarios' %}" class="btn btn-primary">
+            Ver funcionarios
+        </a>
+    </div>
+    <div class="col-md-6 text-center">
+        <img src="{% static 'images/AdministrativosApp/Administrativos1.jpg' %}"
+             alt="Área Administrativa" class="img-fluid rounded shadow">
+    </div>
+</div>
+{% endblock %}

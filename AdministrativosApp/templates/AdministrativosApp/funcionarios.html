@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block titulo %}Funcionarios - Colegio Digital{% endblock %}
+{% block encabezado %}Funcionarios Administrativos{% endblock %}
+
+{% block contenido %}
+<p class="text-muted">
+    Total de funcionarios: {{ total_funcionarios }} &mdash;
+    Departamentos: {{ departamentos|join:", " }}
+</p>
+
+<div class="table-responsive">
+    <table class="table table-striped table-bordered align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Nombre</th>
+                <th>Cargo</th>
+                <th>Departamento</th>
+                <th>Correo</th>
+                <th>Teléfono</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for funcionario in funcionarios %}
+            <tr>
+                <td>{{ funcionario.nombre }} {{ funcionario.apellido }}</td>
+                <td>{{ funcionario.cargo }}</td>
+                <td>{{ funcionario.departamento }}</td>
+                <td>{{ funcionario.correo_electronico }}</td>
+                <td>{{ funcionario.telefono }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">No hay funcionarios registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
