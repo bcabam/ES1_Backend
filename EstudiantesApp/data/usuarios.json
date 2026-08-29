@@ -1,0 +1,6 @@
+[
+    {"id": 1, "nombre": "Juan Alcachofa", "correo": "juan@correo.cl", "password": "123456", "rol": "Estudiante"},
+    {"id": 2, "nombre": "María Estrellita", "correo": "maria@colegio.cl", "password": "123456", "rol": "Estudiante"},
+    {"id": 3, "nombre": "Alan Brito", "correo": "alan@colegio.cl", "password": "123456", "rol": "Estudiante"},
+    {"id": 4, "nombre": "Jorge Nitales", "correo": "jorge@colegio.cl", "password": "123456", "rol": "Estudiante"}
+]
