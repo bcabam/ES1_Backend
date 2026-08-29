@@ -1,0 +1,34 @@
+[
+    {
+        "nombre": "Marcela",
+        "apellido": "Rojas",
+        "cargo": "Directora",
+        "departamento": "Dirección Académica",
+        "correo_electronico": "marcela.rojas@colegiodigital.cl",
+        "telefono": "+56 9 1234 5678"
+    },
+    {
+        "nombre": "Patricio",
+        "apellido": "Fuentes",
+        "cargo": "Encargado de Convivencia Escolar",
+        "departamento": "Convivencia Escolar",
+        "correo_electronico": "patricio.fuentes@colegiodigital.cl",
+        "telefono": "+56 9 2345 6789"
+    },
+    {
+        "nombre": "Camila",
+        "apellido": "Soto",
+        "cargo": "Secretaria",
+        "departamento": "Administración",
+        "correo_electronico": "camila.soto@colegiodigital.cl",
+        "telefono": "+56 9 3456 7890"
+    },
+    {
+        "nombre": "Ignacio",
+        "apellido": "Vega",
+        "cargo": "Encargado de Finanzas",
+        "departamento": "Finanzas",
+        "correo_electronico": "ignacio.vega@colegiodigital.cl",
+        "telefono": "+56 9 4567 8901"
+    }
+]
