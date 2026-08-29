@@ -4,26 +4,59 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Plataforma educativa{% endblock %}</title>
+  <title>{% block title %}Colegio Digital{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/estilos_colegio.css' %}">
 </head>
-<body class="bg-light">
-  <header>
-    <nav class="navbar navbar-expand navbar-dark bg-primary">
-      <div class="container">
-        <a class="navbar-brand" href="{% url 'inicio_docentes' %}">Plataforma educativa</a>
-        {% if request.session.docente %}
-          <div class="navbar-nav ms-auto align-items-center">
-            <span class="navbar-text me-3">{{ request.session.docente.nombre }}</span>
-            <a class="nav-link" href="{% url 'listado_docentes' %}">Estudiantes</a>
-            <a class="nav-link" href="{% url 'logout' %}">Cerrar sesión</a>
-          </div>
-        {% endif %}
+<body class="d-flex flex-column min-vh-100">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-semibold" href="{% url 'inicio_docentes' %}">Colegio Digital</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarPrincipal" aria-controls="navbarPrincipal" aria-expanded="false" aria-label="Abrir navegación">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarPrincipal">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Docentes</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'estudiantes:login' %}">Estudiantes</a></li>
+        </ul>
+        <ul class="navbar-nav align-items-lg-center">
+          {% if request.session.docente %}
+            <li class="nav-item"><span class="navbar-text me-lg-3">Hola, {{ request.session.docente.nombre }}</span></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'listado_docentes' %}">Mi panel</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Cerrar sesión</a></li>
+          {% elif request.session.nombre_usuario %}
+            <li class="nav-item"><span class="navbar-text me-lg-3">Hola, {{ request.session.nombre_usuario }}</span></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'estudiantes:notas' %}">Mis notas</a></li>
+            <li class="nav-item">
+              <form method="post" action="{% url 'estudiantes:logout' %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-link nav-link border-0">Cerrar sesión</button>
+              </form>
+            </li>
+          {% endif %}
+        </ul>
       </div>
-    </nav>
+    </div>
+  </nav>
+
+  <header class="bg-primary text-white text-center py-4">
+    <div class="container"><h1 class="h2 mb-0">{% block heading %}Colegio Digital{% endblock %}</h1></div>
   </header>
-  {% block contenido %}{% endblock %}
-  <footer class="border-top bg-white py-3 text-center text-muted">Plataforma educativa · DocentesApp</footer>
+
+  <main class="container my-4 flex-grow-1 {% block main_class %}{% endblock %}">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+    {% block contenido %}{% endblock %}
+  </main>
+
+  <footer class="bg-dark text-white text-center py-3 mt-auto"><p class="mb-0">&copy; 2026 Colegio Digital. Plataforma educativa.</p></footer>
   <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 </body>
 </html>

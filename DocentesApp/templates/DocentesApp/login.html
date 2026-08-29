@@ -2,9 +2,10 @@
 
 {% block title %}Iniciar sesión{% endblock %}
 
+{% block heading %}Área de Docentes{% endblock %}
 {% block contenido %}
   <main class="container d-flex align-items-center" style="min-height: calc(100vh - 140px);">
-    <section class="card shadow-sm mx-auto" style="max-width: 420px;">
+    <section class="card login-card w-100 mx-auto">
       <div class="card-body p-4">
         <h1 class="h3 text-center mb-4">Iniciar sesión docente</h1>
         {% if error %}<div class="alert alert-danger" role="alert">{{ error }}</div>{% endif %}

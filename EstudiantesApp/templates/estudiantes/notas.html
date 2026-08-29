@@ -1,33 +1,37 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mis Notas</title>
-</head>
-<body>
-    <h1>Mis Notas</h1>
-    <p>Bienvenido/a, {{ nombre_usuario }}.</p>
-    <form method="post" action="{% url 'estudiantes:logout' %}">
-        {% csrf_token %}
-        <button type="submit">Cerrar sesión</button>
-    </form>
+{% extends 'base.html' %}
 
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Asignatura</th>
-                <th>Nota</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for nota in notas %}
-                <tr>
-                    <td>{{ nota.materia }}</td>
-                    <td>{{ nota.nota }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</body>
-</html>
+{% block title %}Mis notas | Colegio Digital{% endblock %}
+{% block heading %}Mis notas{% endblock %}
+
+{% block contenido %}
+  <section class="row justify-content-center">
+    <div class="col-lg-9">
+      <div class="card">
+        <div class="card-body p-4">
+          <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 gap-3">
+            <div>
+              <p class="text-uppercase text-primary fw-semibold small mb-1">Área de Estudiantes</p>
+              <h2 class="h4 mb-0">Hola, {{ nombre_usuario }}</h2>
+            </div>
+            <form method="post" action="{% url 'estudiantes:logout' %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline-primary">Cambiar cuenta</button>
+            </form>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-dark"><tr><th scope="col">Asignatura</th><th scope="col" class="text-end">Nota</th></tr></thead>
+              <tbody>
+                {% for nota in notas %}
+                  <tr><td>{{ nota.materia }}</td><td class="text-end fw-semibold">{{ nota.nota }}</td></tr>
+                {% empty %}
+                  <tr><td colspan="2" class="text-center text-muted py-4">No hay notas disponibles.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
