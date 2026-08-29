@@ -1,0 +1,29 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Plataforma educativa{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+</head>
+<body class="bg-light">
+  <header>
+    <nav class="navbar navbar-expand navbar-dark bg-primary">
+      <div class="container">
+        <a class="navbar-brand" href="{% url 'inicio_docentes' %}">Plataforma educativa</a>
+        {% if request.session.docente %}
+          <div class="navbar-nav ms-auto align-items-center">
+            <span class="navbar-text me-3">{{ request.session.docente.nombre }}</span>
+            <a class="nav-link" href="{% url 'listado_docentes' %}">Estudiantes</a>
+            <a class="nav-link" href="{% url 'logout' %}">Cerrar sesión</a>
+          </div>
+        {% endif %}
+      </div>
+    </nav>
+  </header>
+  {% block contenido %}{% endblock %}
+  <footer class="border-top bg-white py-3 text-center text-muted">Plataforma educativa · DocentesApp</footer>
+  <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>
