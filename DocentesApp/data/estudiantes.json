@@ -1,0 +1,5 @@
+[
+  {"nombre": "Camila Rojas", "curso": "4° Medio A", "promedio": 6.4, "anotaciones": ["Participa activamente en clases."]},
+  {"nombre": "Diego Pérez", "curso": "4° Medio A", "promedio": 5.8, "anotaciones": ["Debe entregar actividad pendiente."]},
+  {"nombre": "Sofía Morales", "curso": "4° Medio A", "promedio": 6.7, "anotaciones": []}
+]

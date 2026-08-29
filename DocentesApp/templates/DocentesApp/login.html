@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Iniciar sesión{% endblock %}
+
+{% block contenido %}
+  <main class="container d-flex align-items-center" style="min-height: calc(100vh - 140px);">
+    <section class="card shadow-sm mx-auto" style="max-width: 420px;">
+      <div class="card-body p-4">
+        <h1 class="h3 text-center mb-4">Iniciar sesión docente</h1>
+        {% if error %}<div class="alert alert-danger" role="alert">{{ error }}</div>{% endif %}
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="cuenta" class="form-label">Cuenta institucional</label>
+            <input type="email" class="form-control" id="cuenta" name="cuenta" value="{{ cuenta }}" placeholder="ejemplo@demo.cl" required autofocus autocomplete="username">
+          </div>
+          <div class="mb-4">
+            <label for="rut" class="form-label">RUT</label>
+            <input type="text" class="form-control" id="rut" name="rut" placeholder="12.345.678-9" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+        </form>
+      </div>
+    </section>
+  </main>
+{% endblock %}
