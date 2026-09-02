@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Iniciar sesión | Estudiantes{% endblock %}
+{% block heading %}Área de Estudiantes{% endblock %}
+{% block main_class %}d-flex align-items-center{% endblock %}
+
+{% block contenido %}
+  <section class="card login-card w-100 mx-auto">
+    <div class="card-body p-4 p-md-5">
+      <p class="text-uppercase text-primary fw-semibold small text-center mb-2">Colegio Digital</p>
+      <h2 class="h3 text-center mb-4">Iniciar sesión</h2>
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="correo" class="form-label">Correo institucional</label>
+          <input type="email" class="form-control" id="correo" name="correo" placeholder="estudiantes@colegiodigital.cl" autocomplete="username" required autofocus>
+        </div>
+        <div class="mb-4">
+          <label for="password" class="form-label">Contraseña</label>
+          <input type="password" class="form-control" id="password" name="password" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+      </form>
+    </div>
+  </section>
+{% endblock %}

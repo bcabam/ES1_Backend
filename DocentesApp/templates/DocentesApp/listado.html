@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Panel docente{% endblock %}
+
+{% block contenido %}
+  <main class="container-fluid py-4 px-md-5">
+    <div class="row g-4">
+      <aside class="col-lg-3 col-xl-2">
+        <div class="card shadow-sm">
+          <div class="card-body p-3">
+            <p class="text-uppercase small fw-bold text-muted mb-2">Mis cursos</p>
+            <nav class="nav nav-pills flex-column gap-1 mb-4">
+              {% for curso in cursos %}
+                <a class="nav-link {% if curso == curso_seleccionado %}active{% else %}text-dark{% endif %}"
+                   href="{% url 'listado_docentes' %}?curso={{ curso|urlencode }}">
+                  {{ curso }}
+                </a>
+              {% empty %}
+                <span class="text-muted small">No hay cursos disponibles.</span>
+              {% endfor %}
+            </nav>
+
+            <p class="text-uppercase small fw-bold text-muted mb-2">Opciones</p>
+            <nav class="nav nav-pills flex-column gap-1">
+              <a class="nav-link active" href="#resumen">Resumen del curso</a>
+              <a class="nav-link text-dark" href="#estudiantes">Estudiantes</a>
+              <a class="nav-link text-dark" href="#notas">Notas</a>
+              <a class="nav-link text-dark" href="#anotaciones">Anotaciones</a>
+              <a class="nav-link text-dark" href="#asistencia">Asistencia</a>
+              <a class="nav-link text-dark" href="#evaluaciones">Evaluaciones</a>
+              <a class="nav-link text-dark" href="#materiales">Material de clases</a>
+              <a class="nav-link text-dark" href="#mensajes">Mensajes</a>
+            </nav>
+          </div>
+        </div>
+      </aside>
+
+      <section class="col-lg-9 col-xl-10">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h1 class="h2 mb-1">{{ curso_seleccionado }}</h1>
+            <p class="text-muted mb-0">Panel de información académica.</p>
+          </div>
+          <img src="{% static 'images/DocentesApp/image.png' %}" alt="Sala de clases" height="70">
+        </div>
+
+        <div id="resumen" class="row g-3 mb-4">
+          <div class="col-sm-6 col-xl-3">
+            <div class="card shadow-sm border-0"><div class="card-body">
+              <p class="text-muted mb-1">Estudiantes</p><p class="h3 mb-0">{{ cantidad_estudiantes }}</p>
+            </div></div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="card shadow-sm border-0"><div class="card-body">
+              <p class="text-muted mb-1">Asistencia promedio</p><p class="h3 mb-0">{{ porcentaje_asistencia|default:'—' }}{% if porcentaje_asistencia %}%{% endif %}</p>
+            </div></div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="card shadow-sm border-0"><div class="card-body">
+              <p class="text-muted mb-1">Promedio del curso</p><p class="h3 mb-0">{{ promedio_general|default:'—' }}</p>
+            </div></div>
+          </div>
+        </div>
+
+        <div id="estudiantes" class="card shadow-sm border-0">
+          <div class="card-header bg-white py-3"><h2 class="h5 mb-0">Estudiantes, notas y anotaciones</h2></div>
+          <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+              <thead class="table-primary"><tr><th>Estudiante</th><th id="notas">Promedio</th><th id="anotaciones">Anotaciones</th></tr></thead>
+              <tbody>
+                {% for estudiante in estudiantes %}
+                  <tr>
+                    <td>{{ estudiante.nombre }}</td>
+                    <td>{{ estudiante.promedio }}</td>
+                    <td>{% for anotacion in estudiante.anotaciones %}<div>{{ anotacion }}</div>{% empty %}<span class="text-muted">Sin anotaciones</span>{% endfor %}</td>
+                  </tr>
+                {% empty %}
+                  <tr><td colspan="3" class="text-center py-4">No hay estudiantes registrados en este curso.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="asistencia" class="card shadow-sm border-0 mt-4">
+          <div class="card-header bg-white py-3"><h2 class="h5 mb-0">Asistencia</h2></div>
+          <div class="table-responsive"><table class="table table-hover mb-0">
+            <thead class="table-light"><tr><th>Estudiante</th><th>Asistencia</th><th>Estado</th></tr></thead>
+            <tbody>{% for asistencia in asistencias %}
+              <tr><td>{{ asistencia.estudiante }}</td><td>{{ asistencia.porcentaje }}%</td><td><span class="badge {% if asistencia.porcentaje < 85 %}text-bg-warning{% else %}text-bg-success{% endif %}">{% if asistencia.porcentaje < 85 %}Atención{% else %}Al día{% endif %}</span></td></tr>
+            {% empty %}<tr><td colspan="3" class="text-center py-3">Sin información de asistencia.</td></tr>{% endfor %}</tbody>
+          </table></div>
+        </div>
+
+        <div class="row g-4 mt-1">
+          <section id="evaluaciones" class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100"><div class="card-header bg-white py-3"><h2 class="h5 mb-0">Calendario de evaluaciones</h2></div>
+              <ul class="list-group list-group-flush">{% for evaluacion in evaluaciones %}
+                <li class="list-group-item"><strong>{{ evaluacion.fecha }}</strong> · {{ evaluacion.titulo }}<div class="text-muted small">{{ evaluacion.descripcion }}</div></li>
+              {% empty %}<li class="list-group-item text-muted">No hay evaluaciones programadas.</li>{% endfor %}</ul>
+            </div>
+          </section>
+          <section id="materiales" class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100"><div class="card-header bg-white py-3"><h2 class="h5 mb-0">Material de clases</h2></div>
+              <ul class="list-group list-group-flush">{% for material in materiales %}
+                <li class="list-group-item"><strong>{{ material.titulo }}</strong><div class="text-muted small">{{ material.tipo }} · {{ material.descripcion }}</div></li>
+              {% empty %}<li class="list-group-item text-muted">No hay materiales disponibles.</li>{% endfor %}</ul>
+            </div>
+          </section>
+        </div>
+
+        <section id="mensajes" class="card shadow-sm border-0 mt-4 mb-4">
+          <div class="card-header bg-white py-3"><h2 class="h5 mb-0">Mensajes a estudiantes y apoderados</h2></div>
+          <div class="list-group list-group-flush">{% for mensaje in mensajes %}
+            <article class="list-group-item"><div class="d-flex justify-content-between"><strong>{{ mensaje.destinatario }}</strong><small class="text-muted">{{ mensaje.fecha }}</small></div><div>{{ mensaje.contenido }}</div></article>
+          {% empty %}<div class="list-group-item text-muted">No hay mensajes enviados.</div>{% endfor %}</div>
+        </section>
+      </section>
+    </div>
+  </main>
+{% endblock %}

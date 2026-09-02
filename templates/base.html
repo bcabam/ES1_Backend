@@ -1,73 +1,78 @@
 {% load static %}
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block titulo %}Colegio Digital{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/estilos_colegio.css' %}">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% block titulo %}Colegio Digital{% endblock %}{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/estilos_colegio.css' %}">
 </head>
 <body class="d-flex flex-column min-vh-100">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-semibold" href="{% url 'inicio_docentes' %}">Colegio Digital</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarPrincipal" aria-controls="navbarPrincipal" aria-expanded="false" aria-label="Abrir navegación">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarPrincipal">
+        <ul class="navbar-nav me-auto">
+          {% if request.session.rol == 'administrativo' %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:inicio' %}">Administrativos</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:listar_funcionarios' %}">Funcionarios</a></li>
+          {% elif request.session.rol == 'docente' %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'listado_docentes' %}">Mi panel docente</a></li>
+          {% elif request.session.rol == 'estudiante' %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'estudiantes:notas' %}">Mis notas</a></li>
+          {% else %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:login' %}">Administrativos</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Docentes</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'estudiantes:login' %}">Estudiantes</a></li>
+          {% endif %}
+        </ul>
+        <ul class="navbar-nav align-items-lg-center">
+          {% if request.session.usuario_actual %}
+            <li class="nav-item"><span class="navbar-text me-lg-3">Hola, {{ request.session.nombre_actual }}</span></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:listar_funcionarios' %}">Funcionarios</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:logout' %}">Cerrar sesión</a></li>
+          {% elif request.session.docente %}
+            <li class="nav-item"><span class="navbar-text me-lg-3">Hola, {{ request.session.docente.nombre }}</span></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'listado_docentes' %}">Mi panel</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Cerrar sesión</a></li>
+          {% elif request.session.nombre_usuario %}
+            <li class="nav-item"><span class="navbar-text me-lg-3">Hola, {{ request.session.nombre_usuario }}</span></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'estudiantes:notas' %}">Mis notas</a></li>
+            <li class="nav-item">
+              <form method="post" action="{% url 'estudiantes:logout' %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-link nav-link border-0">Cerrar sesión</button>
+              </form>
+            </li>
+          {% else %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:login' %}">Iniciar sesión</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'administrativos:inicio' %}">Colegio Digital</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarPrincipal">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarPrincipal">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'administrativos:inicio' %}">Administrativos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'administrativos:listar_funcionarios' %}">Funcionarios</a>
-                    </li>
-                    {% comment %}
-                    Cada integrante agrega aquí los links de su propia app, por ejemplo:
-                    <li class="nav-item"><a class="nav-link" href="{% url 'docentes:inicio' %}">Docentes</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'estudiantes:inicio' %}">Estudiantes</a></li>
-                    {% endcomment %}
-                </ul>
-                <ul class="navbar-nav">
-                    {% if usuario_actual %}
-                    <li class="nav-item">
-                        <span class="nav-link disabled">Hola, {{ nombre_actual }}</span>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'administrativos:logout' %}">Cerrar sesión</a>
-                    </li>
-                    {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'administrativos:login' %}">Iniciar sesión</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'administrativos:registro' %}">Registrarse</a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </div>
+  <header class="bg-primary text-white text-center py-4">
+    <div class="container"><h1 class="h2 mb-0">{% block heading %}{% block encabezado %}Colegio Digital{% endblock %}{% endblock %}</h1></div>
+  </header>
+
+  <main class="container my-4 flex-grow-1 {% block main_class %}{% endblock %}">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
         </div>
-    </nav>
+      {% endfor %}
+    {% endif %}
+    {% block contenido %}{% endblock %}
+  </main>
 
-    <header class="bg-primary text-white text-center py-4">
-        <h1>{% block encabezado %}Colegio Digital{% endblock %}</h1>
-    </header>
-
-    <main class="container my-4 flex-grow-1">
-        {% if messages %}
-        {% for mensaje in messages %}
-        <div class="alert alert-{{ mensaje.tags }}" role="alert">{{ mensaje }}</div>
-        {% endfor %}
-        {% endif %}
-        {% block contenido %}{% endblock %}
-    </main>
-
-    <footer class="bg-dark text-white text-center py-3 mt-auto">
-        <p class="mb-0">&copy; 2026 Colegio Digital. Evaluación Sumativa #1 - Programación Back End.</p>
-    </footer>
-
-    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <footer class="bg-dark text-white text-center py-3 mt-auto"><p class="mb-0">&copy; 2026 Colegio Digital. Plataforma educativa.</p></footer>
+  <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 </body>
 </html>

@@ -1,0 +1,7 @@
+[
+  {
+    "correo": "administrativos@colegiodigital.cl",
+    "nombre": "Administrativo",
+    "contrasena_hash": "pbkdf2_sha256$1500000$Jye0DpuTA3LLXxjN8b7H2R$sQY9ae2uD2QtA/uH4olXxPuWp9gi3M2bbIFf3nlCvH4="
+  }
+]

@@ -1,60 +1,17 @@
-/*
-Paleta e identidad visual compartida por las 3 aplicaciones
-(AdministrativosApp, DocentesApp, EstudiantesApp).
-
-Convención para el equipo: usar SIEMPRE las clases utilitarias de Bootstrap
-(bg-primary, btn-primary, navbar-dark bg-dark, text-primary, etc.) en vez de
-colores propios por app. Este archivo redefine esas clases una sola vez, así
-que cualquier página que extienda templates/base.html queda con el mismo
-estilo automáticamente.
-*/
-
 :root {
-    --color-primario: #1d4e89;
-    --color-primario-oscuro: #123b66;
-    --color-acento: #f2a71b;
-    --color-fondo-suave: #f4f7fb;
+  --color-primario: #1d4e89;
+  --color-primario-oscuro: #123b66;
+  --color-fondo-suave: #f4f7fb;
 }
 
-body {
-    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-    background-color: var(--color-fondo-suave);
-}
-
-.navbar-dark.bg-dark,
-footer.bg-dark {
-    background-color: var(--color-primario-oscuro) !important;
-}
-
-.bg-primary,
-header.bg-primary {
-    background-color: var(--color-primario) !important;
-}
-
-.btn-primary {
-    background-color: var(--color-primario);
-    border-color: var(--color-primario);
-}
-
-.btn-primary:hover,
-.btn-primary:focus {
-    background-color: var(--color-primario-oscuro);
-    border-color: var(--color-primario-oscuro);
-}
-
-a {
-    color: var(--color-primario);
-}
-
-a:hover {
-    color: var(--color-primario-oscuro);
-}
-
-.table-dark {
-    --bs-table-bg: var(--color-primario-oscuro);
-}
-
-.card {
-    border: none;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
+body { font-family: "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--color-fondo-suave); }
+.navbar-dark.bg-dark, footer.bg-dark { background-color: var(--color-primario-oscuro) !important; }
+.bg-primary, header.bg-primary { background-color: var(--color-primario) !important; }
+.btn-primary { background-color: var(--color-primario); border-color: var(--color-primario); }
+.btn-primary:hover, .btn-primary:focus { background-color: var(--color-primario-oscuro); border-color: var(--color-primario-oscuro); }
+a { color: var(--color-primario); }
+a:hover { color: var(--color-primario-oscuro); }
+.card { border: 0; box-shadow: 0 2px 8px rgb(0 0 0 / 8%); }
+.login-card { max-width: 440px; }
+.navbar .btn-link.nav-link { color: rgb(255 255 255 / 55%); }
+.navbar .btn-link.nav-link:hover { color: #fff; }

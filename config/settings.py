@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'AdministrativosApp', #App de administrativos de colegio
+    'DocentesApp',
+    'EstudiantesApp',
 ]
 
 MIDDLEWARE = [
@@ -108,7 +110,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'es-cl'
 
-TIME_ZONE = 'america/santiago'
+TIME_ZONE = 'America/Santiago'
 
 USE_I18N = True
 
@@ -119,15 +121,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
-
-
-# Sesiones firmadas en cookie: el login/registro de AdministrativosApp
-# no usa base de datos, así que las sesiones tampoco deben depender de ella.
+# La sesión se almacena firmada en la cookie, sin usar base de datos.
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+
+# Rutas usadas por el sistema de autenticación.
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'listado_docentes'
+LOGOUT_REDIRECT_URL = 'login'
 
 MESSAGE_TAGS = {
     message_constants.ERROR: 'danger',
