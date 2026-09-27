@@ -1,0 +1,56 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Mantenedor de docentes{% endblock %}
+{% block heading %}Mantenedor de docentes{% endblock %}
+
+{% block contenido %}
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <p class="text-muted mb-0">Administra los datos personales de los docentes.</p>
+    <a class="btn btn-primary" href="{% url 'crear_docente' %}">Crear docente</a>
+  </div>
+
+  <form method="get" class="row g-2 mb-3" role="search">
+    <div class="col-sm-9 col-lg-10">
+      <label class="visually-hidden" for="q">Buscar docente</label>
+      <input class="form-control" type="search" id="q" name="q" value="{{ busqueda }}" placeholder="Buscar por nombre, cuenta o RUT">
+    </div>
+    <div class="col-sm-3 col-lg-2 d-grid">
+      <button class="btn btn-outline-primary" type="submit">Buscar</button>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+      <thead class="table-primary">
+        <tr>
+          <th scope="col">Nombre</th>
+          <th scope="col">Cuenta</th>
+          <th scope="col">RUT</th>
+          <th scope="col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for docente in docentes %}
+          <tr>
+            <td>{{ docente.nombre }}</td>
+            <td>{{ docente.cuenta }}</td>
+            <td>{{ docente.rut }}</td>
+            <td class="text-nowrap">
+              <a class="btn btn-sm btn-outline-primary" href="{% url 'editar_docente' docente.id %}">Editar</a>
+              <form class="d-inline" method="post" action="{% url 'eliminar_docente' docente.id %}" onsubmit="return confirm('¿Seguro que deseas eliminar a este docente?');">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button>
+              </form>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4" class="text-center text-muted py-4">
+              {% if busqueda %}No se encontraron docentes para esa búsqueda.{% else %}No hay docentes registrados.{% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
