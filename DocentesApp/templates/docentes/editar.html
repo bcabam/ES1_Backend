@@ -1,0 +1,27 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Editar docente{% endblock %}
+{% block heading %}Editar docente{% endblock %}
+
+{% block contenido %}
+  {% if error %}<div class="alert alert-danger" role="alert">{{ error }}</div>{% endif %}
+  <form method="post" class="card shadow-sm border-0">
+    {% csrf_token %}
+    <div class="card-body p-4">
+      <div class="mb-3">
+        <label class="form-label" for="nombre">Nombre</label>
+        <input class="form-control" type="text" id="nombre" name="nombre" value="{{ docente.nombre }}" maxlength="150" required autofocus>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="cuenta">Cuenta institucional</label>
+        <input class="form-control" type="email" id="cuenta" name="cuenta" value="{{ docente.cuenta }}" maxlength="254" required>
+      </div>
+      <div class="mb-4">
+        <label class="form-label" for="rut">RUT</label>
+        <input class="form-control" type="text" id="rut" name="rut" value="{{ docente.rut }}" maxlength="12" required>
+      </div>
+      <button class="btn btn-primary" type="submit">Guardar cambios</button>
+      <a class="btn btn-outline-secondary" href="{% url 'listar_docentes' %}">Volver al listado</a>
+    </div>
+  </form>
+{% endblock %}

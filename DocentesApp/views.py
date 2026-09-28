@@ -2,9 +2,15 @@ import json
 import re
 from pathlib import Path
 
-from django.shortcuts import redirect, render
+from django.contrib import messages
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+from django.db.models import Q
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
 from config.autorizacion import redirigir_si_hay_sesion, requiere_rol
+from .models import Docente
 
 
 DATA_DIR = Path(__file__).resolve().parent / 'data'
@@ -22,10 +28,11 @@ def normalizar_rut(rut):
 
 
 docente_requerido = requiere_rol('docente')
+administrativo_requerido = requiere_rol('administrativo')
 
 
 def iniciar_sesion(request):
-    """Valida la cuenta y el RUT definidos en docentes.json."""
+    """Valida la cuenta y el RUT del docente almacenado en la base de datos."""
     redireccion = redirigir_si_hay_sesion(request)
     if redireccion:
         return redireccion
@@ -34,20 +41,14 @@ def iniciar_sesion(request):
     if request.method == 'POST':
         cuenta = request.POST.get('cuenta', '').strip()
         rut = normalizar_rut(request.POST.get('rut', ''))
-        docente = next(
-            (
-                item for item in leer_json('docentes.json')
-                if str(item.get('cuenta', '')).strip().casefold() == cuenta.casefold()
-                and normalizar_rut(item['rut']) == rut
-            ),
-            None,
-        )
-        if docente:
+        docente = Docente.objects.filter(cuenta__iexact=cuenta).first()
+        if docente and normalizar_rut(docente.rut) == rut:
             request.session.flush()
             request.session['rol'] = 'docente'
             request.session['docente'] = {
-                'nombre': docente['nombre'],
-                'cuenta': docente['cuenta'],
+                'id': docente.id,
+                'nombre': docente.nombre,
+                'cuenta': docente.cuenta,
             }
             return redirect('listado_docentes')
         error = 'La cuenta o el RUT no son válidos.'
@@ -124,3 +125,114 @@ def listado_docentes(request):
             'docente': request.session['docente'],
         },
     )
+
+
+@administrativo_requerido
+def listar_docentes(request):
+    busqueda = request.GET.get('q', '').strip()
+    docentes = Docente.objects.all()
+    if busqueda:
+        filtros = (
+            Q(nombre__icontains=busqueda)
+            | Q(cuenta__icontains=busqueda)
+            | Q(rut__icontains=busqueda)
+        )
+        rut_buscado = normalizar_rut(busqueda)
+        if any(caracter.isdigit() for caracter in busqueda) and rut_buscado:
+            ids_rut = [
+                docente_id
+                for docente_id, rut in Docente.objects.values_list('id', 'rut')
+                if rut_buscado in normalizar_rut(rut)
+            ]
+            filtros |= Q(id__in=ids_rut)
+        docentes = docentes.filter(filtros)
+    return render(
+        request,
+        'docentes/listar.html',
+        {'docentes': docentes, 'busqueda': busqueda},
+    )
+
+
+def _validar_datos_docente(nombre, cuenta, rut, docente_actual=None):
+    if not nombre or not cuenta or not rut:
+        return 'Completa todos los campos.'
+    if len(nombre) > 150 or len(cuenta) > 254 or len(rut) > 12:
+        return 'Uno de los campos supera la longitud permitida.'
+    try:
+        validate_email(cuenta)
+    except ValidationError:
+        return 'Ingresa una cuenta de correo válida.'
+
+    docentes = Docente.objects.all()
+    if docente_actual:
+        docentes = docentes.exclude(pk=docente_actual.pk)
+    if docentes.filter(cuenta__iexact=cuenta).exists():
+        return 'Ya existe un docente con esa cuenta.'
+    rut_normalizado = normalizar_rut(rut)
+    if any(normalizar_rut(item) == rut_normalizado for item in docentes.values_list('rut', flat=True)):
+        return 'Ya existe un docente con ese RUT.'
+    return None
+
+
+@administrativo_requerido
+def crear_docente(request):
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre', '').strip()
+        cuenta = request.POST.get('cuenta', '').strip()
+        rut = request.POST.get('rut', '').strip()
+
+        error = _validar_datos_docente(nombre, cuenta, rut)
+        if error:
+            return render(
+                request,
+                'docentes/crear.html',
+                {
+                    'error': error,
+                    'nombre': nombre,
+                    'cuenta': cuenta,
+                    'rut': rut,
+                },
+            )
+        Docente.objects.create(nombre=nombre, cuenta=cuenta, rut=rut)
+        messages.success(request, 'Docente creado correctamente.')
+        return redirect('listar_docentes')
+
+    return render(request, 'docentes/crear.html')
+
+
+@administrativo_requerido
+def editar_docente(request, id):
+    docente = get_object_or_404(Docente, id=id)
+
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre', '').strip()
+        cuenta = request.POST.get('cuenta', '').strip()
+        rut = request.POST.get('rut', '').strip()
+
+        error = _validar_datos_docente(nombre, cuenta, rut, docente)
+        if error:
+            docente.nombre = nombre
+            docente.cuenta = cuenta
+            docente.rut = rut
+            return render(
+                request,
+                'docentes/editar.html',
+                {'docente': docente, 'error': error},
+            )
+        docente.nombre = nombre
+        docente.cuenta = cuenta
+        docente.rut = rut
+        docente.save()
+        messages.success(request, 'Datos del docente actualizados correctamente.')
+        return redirect('listar_docentes')
+
+    return render(request, 'docentes/editar.html', {'docente': docente})
+
+
+@require_POST
+@administrativo_requerido
+def eliminar_docente(request, id):
+    docente = get_object_or_404(Docente, id=id)
+    docente.delete()
+    messages.success(request, 'Docente eliminado correctamente.')
+    return redirect('listar_docentes')
