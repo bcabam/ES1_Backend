@@ -1,0 +1,21 @@
+# Servicio de systemd: mantiene Django (Gunicorn) corriendo y lo inicia
+# automáticamente cada vez que se enciende la instancia.
+# Se copia a /etc/systemd/system/colegio.service
+
+[Unit]
+Description=Colegio Digital (Django + Gunicorn)
+After=network-online.target mysql.service
+Wants=network-online.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/ES1_Backend
+# Antes de arrancar, actualiza la IP pública en el .env.
+ExecStartPre=/bin/bash /home/ubuntu/ES1_Backend/deploy/actualizar_ip.sh
+ExecStart=/home/ubuntu/ES1_Backend/venv/bin/gunicorn config.wsgi:application \
+    --bind 127.0.0.1:8000 --workers 2
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

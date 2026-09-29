@@ -1,0 +1,4 @@
+# Los scripts de Linux deben mantener finales de línea LF aunque se editen en Windows.
+*.sh text eol=lf
+*.service text eol=lf
+deploy/*.conf text eol=lf

@@ -34,6 +34,11 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
+# Orígenes confiables para formularios (POST) cuando se accede por IP o dominio.
+CSRF_TRUSTED_ORIGINS = [
+    origen for origen in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if origen
+]
+
 
 # Application definition
 
@@ -137,6 +142,8 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+# En el servidor, collectstatic reúne aquí todos los archivos estáticos.
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Archivos subidos por los usuarios (fotos y documentos PDF).
 MEDIA_URL = 'media/'
