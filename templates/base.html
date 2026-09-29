@@ -21,6 +21,7 @@
           {% if perfil == 'administrador' or perfil == 'administrativo' %}
             <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:inicio' %}">Inicio</a></li>
             <li class="nav-item"><a class="nav-link" href="{% url 'listar_docentes' %}">Docentes</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'estudiantes:lista_estudiantes' %}">Estudiantes</a></li>
             <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:listar_funcionarios' %}">Funcionarios</a></li>
             {% if perfil == 'administrador' %}
               <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:crear_usuario' %}">Crear usuario</a></li>

@@ -95,7 +95,7 @@ DATABASES = {
         'OPTIONS': {
             'charset': 'utf8mb4',
             # WAMP usa MyISAM por defecto, que no soporta llaves foráneas.
-            'init_command': "SET default_storage_engine=INNODB",
+            'init_command': "SET default_storage_engine=INNODB, sql_mode='STRICT_TRANS_TABLES'",
         },
     }
 }
@@ -137,6 +137,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# Archivos subidos por los usuarios (fotos y documentos PDF).
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Rutas usadas por el sistema de autenticación.
 LOGIN_URL = 'login'
