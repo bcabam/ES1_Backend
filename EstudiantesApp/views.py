@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+<<<<<<< Updated upstream
 from django.contrib import messages
 from django.shortcuts import redirect, render
 
@@ -9,6 +10,14 @@ def cargar_usuarios():
     ruta = Path(__file__).resolve().parent / "data" / "usuarios.json"
     with ruta.open(encoding="utf-8") as archivo:
         return json.load(archivo)
+=======
+from django.shortcuts import render, redirect, get_object_or_404
+from config.autorizacion import requiere_rol
+from .models import Estudiante
+from .forms import EstudianteForm
+from django.db.models import Q
+from django.contrib import messages
+>>>>>>> Stashed changes
 
 
 def cargar_notas():
@@ -58,9 +67,82 @@ def notas(request):
         {"notas": cargar_notas(), "nombre_usuario": nombre_usuario},
     )
 
+<<<<<<< Updated upstream
 
 def cerrar_sesion(request):
     if request.method == "POST":
         request.session.flush()
         messages.success(request, "Sesión cerrada correctamente.")
     return redirect("login")
+=======
+def lista_estudiantes(request):
+    busqueda = request.GET.get("busqueda", "").strip()
+
+    estudiantes = Estudiante.objects.all()
+
+    if busqueda:
+        estudiantes = estudiantes.filter(
+            Q(nombre__icontains=busqueda)
+            | Q(rut__icontains=busqueda)
+            | Q(curso__icontains=busqueda)
+        )
+
+    return render(
+        request,
+        "estudiantes/lista_estudiantes.html",
+        {
+            "estudiantes": estudiantes,
+            "busqueda": busqueda,
+        },
+    )
+
+def crear_estudiante(request):
+    if request.method == "POST":
+        form = EstudianteForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Estudiante creado correctamente.")
+            return redirect("estudiantes:lista_estudiantes")
+    else:
+        form = EstudianteForm()
+
+    return render(
+        request,
+        "estudiantes/crear_estudiantes.html",
+        {"form": form},
+    )
+
+def editar_estudiante(request, estudiante_id):
+    estudiante = get_object_or_404(Estudiante, id=estudiante_id)
+
+    if request.method == "POST":
+        form = EstudianteForm(request.POST, instance=estudiante)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Estudiante actualizado correctamente.")
+            return redirect("estudiantes:lista_estudiantes")
+    else:
+        form = EstudianteForm(instance=estudiante)
+
+    return render(
+        request,
+        "estudiantes/editar_estudiantes.html",
+        {"form": form, "estudiante": estudiante},
+    )
+
+def eliminar_estudiante(request, estudiante_id):
+    estudiante = get_object_or_404(Estudiante, id=estudiante_id)
+
+    if request.method == "POST":
+        estudiante.delete()
+        messages.success(request, "Estudiante eliminado correctamente.")
+        return redirect("estudiantes:lista_estudiantes")
+
+    return render(
+        request,
+        "estudiantes/eliminar_estudiantes.html",
+        {"estudiante": estudiante},
+    )
+>>>>>>> Stashed changes
