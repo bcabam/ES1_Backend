@@ -4,9 +4,7 @@ from . import views
 urlpatterns = [
     path("login/", views.login, name="login"),
     path("notas/", views.notas, name="notas"),
-<<<<<<< Updated upstream
     path("logout/", views.cerrar_sesion, name="logout"),
-=======
     path("estudiantes/", views.lista_estudiantes, name="lista_estudiantes"),
     path("estudiantes/nuevo/", views.crear_estudiante, name="crear_estudiante"),
     path(
@@ -19,5 +17,4 @@ urlpatterns = [
         views.eliminar_estudiante,
         name="eliminar_estudiante",
     ),
->>>>>>> Stashed changes
 ]
