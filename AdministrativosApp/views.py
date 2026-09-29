@@ -1,16 +1,12 @@
-import json
-from pathlib import Path
-
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.shortcuts import redirect, render
 
 from config.autorizacion import RUTAS_INICIO, perfil_de, requiere_rol
 from .forms import CrearUsuarioForm
-
-RUTA_DATOS_FUNCIONARIOS = Path(settings.BASE_DIR) / 'datos' / 'funcionarios.json'
+from .models import Administrativo
 
 
 @login_required
@@ -31,15 +27,31 @@ def inicio_administrativos(request):
 
 @requiere_rol('administrativo')
 def listar_funcionarios(request):
-    with open(RUTA_DATOS_FUNCIONARIOS, 'r', encoding='utf-8') as archivo:
-        datos_funcionarios = json.load(archivo)
+    busqueda = request.GET.get('q', '').strip()
+    departamento = request.GET.get('departamento', '')
 
-    departamentos = sorted({funcionario['departamento'] for funcionario in datos_funcionarios})
+    funcionarios = Administrativo.objects.all()
+    if busqueda:
+        funcionarios = funcionarios.filter(
+            Q(nombre__icontains=busqueda)
+            | Q(apellido__icontains=busqueda)
+            | Q(cargo__icontains=busqueda)
+            | Q(correo_electronico__icontains=busqueda)
+        )
+    if departamento:
+        funcionarios = funcionarios.filter(departamento=departamento)
+
+    departamentos = (
+        Administrativo.objects.order_by('departamento')
+        .values_list('departamento', flat=True).distinct()
+    )
 
     contexto = {
-        'funcionarios': datos_funcionarios,
-        'total_funcionarios': len(datos_funcionarios),
+        'funcionarios': funcionarios,
+        'total_funcionarios': funcionarios.count(),
         'departamentos': departamentos,
+        'busqueda': busqueda,
+        'departamento_seleccionado': departamento,
     }
     return render(request, 'AdministrativosApp/funcionarios.html', contexto)
 
