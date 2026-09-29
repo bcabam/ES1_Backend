@@ -1,7 +1,6 @@
 import json
 from pathlib import Path
 
-<<<<<<< Updated upstream
 from django.contrib import messages
 from django.shortcuts import redirect, render
 
@@ -10,14 +9,11 @@ def cargar_usuarios():
     ruta = Path(__file__).resolve().parent / "data" / "usuarios.json"
     with ruta.open(encoding="utf-8") as archivo:
         return json.load(archivo)
-=======
 from django.shortcuts import render, redirect, get_object_or_404
-from config.autorizacion import requiere_rol
 from .models import Estudiante
 from .forms import EstudianteForm
 from django.db.models import Q
 from django.contrib import messages
->>>>>>> Stashed changes
 
 
 def cargar_notas():
@@ -67,14 +63,12 @@ def notas(request):
         {"notas": cargar_notas(), "nombre_usuario": nombre_usuario},
     )
 
-<<<<<<< Updated upstream
 
 def cerrar_sesion(request):
     if request.method == "POST":
         request.session.flush()
         messages.success(request, "Sesión cerrada correctamente.")
     return redirect("login")
-=======
 def lista_estudiantes(request):
     busqueda = request.GET.get("busqueda", "").strip()
 
@@ -145,4 +139,3 @@ def eliminar_estudiante(request, estudiante_id):
         "estudiantes/eliminar_estudiantes.html",
         {"estudiante": estudiante},
     )
->>>>>>> Stashed changes
