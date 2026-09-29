@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrar nota{% endblock %}
+{% block heading %}Registrar nota{% endblock %}
+
+{% block contenido %}
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <p class="text-muted">Ingresa una evaluación para un estudiante. La nota debe estar entre 1,0 y 7,0.</p>
+          <form method="post">
+            {% csrf_token %}
+            {{ formulario.non_field_errors }}
+            {% for campo in formulario %}
+              <div class="mb-3">
+                <label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                {{ campo }}
+                {% for error in campo.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+              </div>
+            {% endfor %}
+            <button class="btn btn-primary" type="submit">Guardar nota</button>
+            <a class="btn btn-outline-secondary" href="{% url 'listado_docentes' %}">Volver al panel</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

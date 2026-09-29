@@ -20,12 +20,12 @@
           </div>
           <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-              <thead class="table-dark"><tr><th scope="col">Asignatura</th><th scope="col" class="text-end">Nota</th></tr></thead>
+              <thead class="table-dark"><tr><th scope="col">Asignatura</th><th scope="col">Evaluación</th><th scope="col" class="text-end">Nota</th></tr></thead>
               <tbody>
                 {% for nota in notas %}
-                  <tr><td>{{ nota.materia }}</td><td class="text-end fw-semibold">{{ nota.nota }}</td></tr>
+                  <tr><td>{{ nota.asignatura }}</td><td>{{ nota.evaluacion }}</td><td class="text-end fw-semibold">{{ nota.calificacion }}</td></tr>
                 {% empty %}
-                  <tr><td colspan="2" class="text-center text-muted py-4">No hay notas disponibles.</td></tr>
+                  <tr><td colspan="3" class="text-center text-muted py-4">No hay notas registradas.</td></tr>
                 {% endfor %}
               </tbody>
             </table>

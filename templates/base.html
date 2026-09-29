@@ -28,6 +28,7 @@
             {% endif %}
           {% elif perfil == 'docente' %}
             <li class="nav-item"><a class="nav-link" href="{% url 'listado_docentes' %}">Mi panel docente</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'estudiantes:registrar_nota' %}">Registrar notas</a></li>
           {% elif perfil == 'estudiante' %}
             <li class="nav-item"><a class="nav-link" href="{% url 'estudiantes:notas' %}">Mis notas</a></li>
           {% endif %}

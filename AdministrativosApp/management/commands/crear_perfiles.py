@@ -12,27 +12,22 @@ PERMISOS_POR_GRUPO = {
     'Administrador': [
         'DocentesApp.add_docente', 'DocentesApp.change_docente',
         'DocentesApp.delete_docente', 'DocentesApp.view_docente',
-        'EstudiantesApp.add_estudiante', 'EstudiantesApp.change_estudiante',
-        'EstudiantesApp.delete_estudiante', 'EstudiantesApp.view_estudiante',
-        'DocentesApp.add_registronota', 'DocentesApp.change_registronota',
-        'DocentesApp.delete_registronota', 'DocentesApp.view_registronota',
+        'EstudiantesApp.add_nota', 'EstudiantesApp.change_nota',
+        'EstudiantesApp.delete_nota', 'EstudiantesApp.view_nota',
     ],
     # Administrativo (perfil Operador): crea, modifica y consulta; no elimina.
     'Administrativo': [
         'DocentesApp.add_docente', 'DocentesApp.change_docente', 'DocentesApp.view_docente',
-        'EstudiantesApp.add_estudiante', 'EstudiantesApp.change_estudiante',
-        'EstudiantesApp.view_estudiante',
-        'DocentesApp.view_registronota',
+        'EstudiantesApp.view_nota',
     ],
     # Docente: registra y modifica notas de sus estudiantes.
     'Docente': [
-        'EstudiantesApp.view_estudiante',
-        'DocentesApp.add_registronota', 'DocentesApp.change_registronota',
-        'DocentesApp.view_registronota',
+        'EstudiantesApp.add_nota', 'EstudiantesApp.change_nota',
+        'EstudiantesApp.view_nota',
     ],
     # Estudiante (perfil Consulta): solo visualiza.
     'Estudiante': [
-        'DocentesApp.view_registronota',
+        'EstudiantesApp.view_nota',
     ],
 }
 

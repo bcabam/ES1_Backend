@@ -1,15 +1,9 @@
-import json
-from pathlib import Path
-
-from django.shortcuts import render
+from django.contrib import messages
+from django.shortcuts import redirect, render
 
 from config.autorizacion import requiere_rol
-
-
-def cargar_notas():
-    ruta = Path(__file__).resolve().parent / "data" / "notas.json"
-    with ruta.open(encoding="utf-8") as archivo:
-        return json.load(archivo)
+from .forms import RegistrarNotaForm
+from .models import Nota
 
 
 @requiere_rol("estudiante")
@@ -19,5 +13,24 @@ def notas(request):
     return render(
         request,
         "estudiantes/notas.html",
-        {"notas": cargar_notas(), "nombre_usuario": nombre_usuario},
+        {
+            "notas": Nota.objects.filter(estudiante=request.user).select_related('docente'),
+            "nombre_usuario": nombre_usuario,
+        },
     )
+
+
+@requiere_rol('docente')
+def registrar_nota(request):
+    if request.method == 'POST':
+        formulario = RegistrarNotaForm(request.POST)
+        if formulario.is_valid():
+            nota = formulario.save(commit=False)
+            nota.docente = request.user
+            nota.save()
+            messages.success(request, 'La nota se registró correctamente.')
+            return redirect('estudiantes:registrar_nota')
+    else:
+        formulario = RegistrarNotaForm()
+
+    return render(request, 'estudiantes/registrar_nota.html', {'formulario': formulario})
