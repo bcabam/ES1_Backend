@@ -1,7 +1,14 @@
+import shutil
+import tempfile
+
 from django.contrib.auth.models import Group, User
+from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
+
+from .models import Administrativo
 
 
 class LoginUnicoTests(TestCase):
@@ -89,3 +96,75 @@ class LoginUnicoTests(TestCase):
             self.client.get(reverse('inicio_por_perfil')), reverse('login')
         )
         self.assertFalse(Group.objects.filter(user__username='sin_perfil').exists())
+
+
+MEDIA_TEMPORAL = tempfile.mkdtemp()
+
+# Imagen GIF de 1x1 píxel, suficiente para validar un ImageField.
+GIF_MINIMO = (
+    b'GIF89a\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\xff\xff\xff!\xf9\x04'
+    b'\x01\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;'
+)
+
+
+@override_settings(MEDIA_ROOT=MEDIA_TEMPORAL)
+class FuncionariosTests(TestCase):
+    fixtures = ['funcionarios']
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command('crear_perfiles', '--demo', verbosity=0)
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        shutil.rmtree(MEDIA_TEMPORAL, ignore_errors=True)
+
+    def setUp(self):
+        self.client.login(username='administrativo', password='Colegio2026!')
+
+    def test_lista_funcionarios_desde_la_base_de_datos(self):
+        respuesta = self.client.get(reverse('administrativos:listar_funcionarios'))
+        self.assertContains(respuesta, 'Marcela')
+        self.assertEqual(respuesta.context['total_funcionarios'], 4)
+
+    def test_busqueda_filtra_funcionarios(self):
+        respuesta = self.client.get(
+            reverse('administrativos:listar_funcionarios'), {'q': 'directora'}
+        )
+        self.assertEqual(respuesta.context['total_funcionarios'], 1)
+        self.assertContains(respuesta, 'Marcela')
+
+    def test_foto_y_contrato_se_muestran(self):
+        funcionario = Administrativo.objects.get(nombre='Marcela')
+        funcionario.foto = SimpleUploadedFile('foto.gif', GIF_MINIMO, content_type='image/gif')
+        funcionario.contrato = SimpleUploadedFile(
+            'contrato.pdf', b'%PDF-1.4 prueba', content_type='application/pdf'
+        )
+        funcionario.save()
+
+        respuesta = self.client.get(reverse('administrativos:listar_funcionarios'))
+        self.assertContains(respuesta, funcionario.foto.url)
+        self.assertContains(respuesta, funcionario.contrato.url)
+
+    def test_admin_sube_foto_y_contrato(self):
+        self.client.login(username='admin', password='Colegio2026!')
+        funcionario = Administrativo.objects.get(nombre='Marcela')
+        url = reverse('admin:AdministrativosApp_administrativo_change', args=[funcionario.pk])
+        self.client.post(url, {
+            'nombre': funcionario.nombre, 'apellido': funcionario.apellido,
+            'cargo': funcionario.cargo, 'departamento': funcionario.departamento,
+            'correo_electronico': funcionario.correo_electronico,
+            'telefono': funcionario.telefono,
+            'foto': SimpleUploadedFile('foto.gif', GIF_MINIMO, content_type='image/gif'),
+            'contrato': SimpleUploadedFile('contrato.pdf', b'%PDF-1.4', content_type='application/pdf'),
+        })
+        funcionario.refresh_from_db()
+        self.assertTrue(funcionario.foto.name.startswith('administrativos/fotos/'))
+        self.assertTrue(funcionario.contrato.name.startswith('administrativos/contratos/'))
+
+    def test_contrato_debe_ser_pdf(self):
+        funcionario = Administrativo.objects.get(nombre='Marcela')
+        funcionario.contrato = SimpleUploadedFile('contrato.exe', b'MZ')
+        with self.assertRaises(ValidationError):
+            funcionario.full_clean()
