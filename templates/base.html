@@ -11,45 +11,38 @@
 <body class="d-flex flex-column min-vh-100">
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
     <div class="container">
-      <a class="navbar-brand fw-semibold" href="{% url 'inicio_docentes' %}">Colegio Digital</a>
+      <a class="navbar-brand fw-semibold" href="{% if user.is_authenticated %}{% url 'inicio_por_perfil' %}{% else %}{% url 'login' %}{% endif %}">Colegio Digital</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarPrincipal" aria-controls="navbarPrincipal" aria-expanded="false" aria-label="Abrir navegación">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarPrincipal">
+        {# Menú dinámico: cada perfil ve solo las opciones que le corresponden. #}
         <ul class="navbar-nav me-auto">
-          {% if request.session.rol == 'administrativo' %}
-            <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:inicio' %}">Administrativos</a></li>
+          {% if perfil == 'administrador' or perfil == 'administrativo' %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:inicio' %}">Inicio</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'listar_docentes' %}">Docentes</a></li>
             <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:listar_funcionarios' %}">Funcionarios</a></li>
-          {% elif request.session.rol == 'docente' %}
+            {% if perfil == 'administrador' %}
+              <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:crear_usuario' %}">Crear usuario</a></li>
+              <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">Django Admin</a></li>
+            {% endif %}
+          {% elif perfil == 'docente' %}
             <li class="nav-item"><a class="nav-link" href="{% url 'listado_docentes' %}">Mi panel docente</a></li>
-          {% elif request.session.rol == 'estudiante' %}
+          {% elif perfil == 'estudiante' %}
             <li class="nav-item"><a class="nav-link" href="{% url 'estudiantes:notas' %}">Mis notas</a></li>
-          {% else %}
-            <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:login' %}">Administrativos</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Docentes</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'estudiantes:login' %}">Estudiantes</a></li>
           {% endif %}
         </ul>
         <ul class="navbar-nav align-items-lg-center">
-          {% if request.session.usuario_actual %}
-            <li class="nav-item"><span class="navbar-text me-lg-3">Hola, {{ request.session.nombre_actual }}</span></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:listar_funcionarios' %}">Funcionarios</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:logout' %}">Cerrar sesión</a></li>
-          {% elif request.session.docente %}
-            <li class="nav-item"><span class="navbar-text me-lg-3">Hola, {{ request.session.docente.nombre }}</span></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'listado_docentes' %}">Mi panel</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Cerrar sesión</a></li>
-          {% elif request.session.nombre_usuario %}
-            <li class="nav-item"><span class="navbar-text me-lg-3">Hola, {{ request.session.nombre_usuario }}</span></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'estudiantes:notas' %}">Mis notas</a></li>
+          {% if user.is_authenticated %}
+            <li class="nav-item"><span class="navbar-text me-lg-3">Hola, {{ user.get_full_name|default:user.username }}{% if perfil %} ({{ perfil|capfirst }}){% endif %}</span></li>
             <li class="nav-item">
-              <form method="post" action="{% url 'estudiantes:logout' %}" class="d-inline">
+              <form method="post" action="{% url 'logout' %}" class="d-inline">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-link nav-link border-0">Cerrar sesión</button>
               </form>
             </li>
           {% else %}
-            <li class="nav-item"><a class="nav-link" href="{% url 'administrativos:login' %}">Iniciar sesión</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Iniciar sesión</a></li>
           {% endif %}
         </ul>
       </div>
