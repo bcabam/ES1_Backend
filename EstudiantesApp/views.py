@@ -1,9 +1,13 @@
 import json
 from pathlib import Path
 
-from django.shortcuts import render
+from django.contrib import messages
+from django.db.models import Q
+from django.shortcuts import get_object_or_404, redirect, render
 
 from config.autorizacion import requiere_rol
+from .forms import EstudianteForm
+from .models import Estudiante
 
 
 def cargar_notas():
@@ -20,4 +24,83 @@ def notas(request):
         request,
         "estudiantes/notas.html",
         {"notas": cargar_notas(), "nombre_usuario": nombre_usuario},
+    )
+
+
+@requiere_rol("administrativo")
+def lista_estudiantes(request):
+    busqueda = request.GET.get("busqueda", "").strip()
+
+    estudiantes = Estudiante.objects.all()
+
+    if busqueda:
+        estudiantes = estudiantes.filter(
+            Q(nombre__icontains=busqueda)
+            | Q(rut__icontains=busqueda)
+            | Q(curso__icontains=busqueda)
+        )
+
+    return render(
+        request,
+        "estudiantes/lista_estudiantes.html",
+        {
+            "estudiantes": estudiantes,
+            "busqueda": busqueda,
+        },
+    )
+
+
+@requiere_rol("administrativo")
+def crear_estudiante(request):
+    if request.method == "POST":
+        form = EstudianteForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Estudiante creado correctamente.")
+            return redirect("estudiantes:lista_estudiantes")
+    else:
+        form = EstudianteForm()
+
+    return render(
+        request,
+        "estudiantes/crear_estudiantes.html",
+        {"form": form},
+    )
+
+
+@requiere_rol("administrativo")
+def editar_estudiante(request, estudiante_id):
+    estudiante = get_object_or_404(Estudiante, id=estudiante_id)
+
+    if request.method == "POST":
+        form = EstudianteForm(request.POST, instance=estudiante)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Estudiante actualizado correctamente.")
+            return redirect("estudiantes:lista_estudiantes")
+    else:
+        form = EstudianteForm(instance=estudiante)
+
+    return render(
+        request,
+        "estudiantes/editar_estudiantes.html",
+        {"form": form, "estudiante": estudiante},
+    )
+
+
+@requiere_rol("administrador")  # El operador (administrativo) no puede eliminar.
+def eliminar_estudiante(request, estudiante_id):
+    estudiante = get_object_or_404(Estudiante, id=estudiante_id)
+
+    if request.method == "POST":
+        estudiante.delete()
+        messages.success(request, "Estudiante eliminado correctamente.")
+        return redirect("estudiantes:lista_estudiantes")
+
+    return render(
+        request,
+        "estudiantes/eliminar_estudiantes.html",
+        {"estudiante": estudiante},
     )
