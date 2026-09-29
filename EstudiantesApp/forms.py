@@ -5,7 +5,13 @@ from .models import Estudiante
 class EstudianteForm(forms.ModelForm):
     class Meta:
         model = Estudiante
-        fields = ["nombre", "rut", "curso", "cuenta"]
+        fields = ["nombre", "rut", "curso", "cuenta", "foto"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Aplica el estilo de Bootstrap a todos los campos del formulario.
+        for campo in self.fields.values():
+            campo.widget.attrs["class"] = "form-control"
 
     def clean_nombre(self):
         nombre = self.cleaned_data["nombre"].strip()

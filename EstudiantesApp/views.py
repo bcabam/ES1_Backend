@@ -53,7 +53,7 @@ def lista_estudiantes(request):
 @requiere_rol("administrativo")
 def crear_estudiante(request):
     if request.method == "POST":
-        form = EstudianteForm(request.POST)
+        form = EstudianteForm(request.POST, request.FILES)
 
         if form.is_valid():
             form.save()
@@ -74,7 +74,7 @@ def editar_estudiante(request, estudiante_id):
     estudiante = get_object_or_404(Estudiante, id=estudiante_id)
 
     if request.method == "POST":
-        form = EstudianteForm(request.POST, instance=estudiante)
+        form = EstudianteForm(request.POST, request.FILES, instance=estudiante)
 
         if form.is_valid():
             form.save()
