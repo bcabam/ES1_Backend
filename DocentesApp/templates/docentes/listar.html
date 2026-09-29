@@ -37,10 +37,12 @@
             <td>{{ docente.rut }}</td>
             <td class="text-nowrap">
               <a class="btn btn-sm btn-outline-primary" href="{% url 'editar_docente' docente.id %}">Editar</a>
-              <form class="d-inline" method="post" action="{% url 'eliminar_docente' docente.id %}" onsubmit="return confirm('¿Seguro que deseas eliminar a este docente?');">
-                {% csrf_token %}
-                <button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button>
-              </form>
+              {% if perfil == 'administrador' %}
+                <form class="d-inline" method="post" action="{% url 'eliminar_docente' docente.id %}" onsubmit="return confirm('¿Seguro que deseas eliminar a este docente?');">
+                  {% csrf_token %}
+                  <button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button>
+                </form>
+              {% endif %}
             </td>
           </tr>
         {% empty %}

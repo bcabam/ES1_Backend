@@ -71,7 +71,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'AdministrativosApp.context_processors.usuario_actual',
+                'AdministrativosApp.context_processors.perfil_usuario',
             ],
         },
     },
@@ -138,12 +138,9 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# La sesión se almacena firmada en la cookie, sin usar base de datos.
-SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
-
 # Rutas usadas por el sistema de autenticación.
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'listado_docentes'
+LOGIN_REDIRECT_URL = 'inicio_por_perfil'
 LOGOUT_REDIRECT_URL = 'login'
 
 MESSAGE_TAGS = {

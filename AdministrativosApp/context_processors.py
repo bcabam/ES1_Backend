@@ -1,5 +1,6 @@
-def usuario_actual(request):
-    return {
-        'usuario_actual': request.session.get('usuario_actual'),
-        'nombre_actual': request.session.get('nombre_actual'),
-    }
+from config.autorizacion import perfil_de
+
+
+def perfil_usuario(request):
+    """Deja disponible {{ perfil }} en todas las plantillas para armar el menú."""
+    return {'perfil': perfil_de(request.user)}

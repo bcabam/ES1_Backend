@@ -9,7 +9,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from config.autorizacion import redirigir_si_hay_sesion, requiere_rol
+from config.autorizacion import requiere_rol
 from .models import Docente
 
 
@@ -31,43 +31,9 @@ docente_requerido = requiere_rol('docente')
 administrativo_requerido = requiere_rol('administrativo')
 
 
-def iniciar_sesion(request):
-    """Valida la cuenta y el RUT del docente almacenado en la base de datos."""
-    redireccion = redirigir_si_hay_sesion(request)
-    if redireccion:
-        return redireccion
-
-    error = None
-    if request.method == 'POST':
-        cuenta = request.POST.get('cuenta', '').strip()
-        rut = normalizar_rut(request.POST.get('rut', ''))
-        docente = Docente.objects.filter(cuenta__iexact=cuenta).first()
-        if docente and normalizar_rut(docente.rut) == rut:
-            request.session.flush()
-            request.session['rol'] = 'docente'
-            request.session['docente'] = {
-                'id': docente.id,
-                'nombre': docente.nombre,
-                'cuenta': docente.cuenta,
-            }
-            return redirect('listado_docentes')
-        error = 'La cuenta o el RUT no son válidos.'
-
-    return render(
-        request,
-        'DocentesApp/login.html',
-        {'error': error, 'cuenta': request.POST.get('cuenta', '')},
-    )
-
-
-def cerrar_sesion(request):
-    request.session.flush()
-    return redirect('login')
-
-
 def inicio(request):
-    redireccion = redirigir_si_hay_sesion(request)
-    return redireccion or redirect('login')
+    """El inicio lo resuelve el login único según el perfil del usuario."""
+    return redirect('inicio_por_perfil')
 
 
 @docente_requerido
@@ -122,7 +88,7 @@ def listado_docentes(request):
                 mensaje for mensaje in leer_json('mensajes.json')
                 if mensaje['curso'] == curso_seleccionado
             ],
-            'docente': request.session['docente'],
+            'docente': {'nombre': request.user.get_full_name() or request.user.username},
         },
     )
 
@@ -230,7 +196,7 @@ def editar_docente(request, id):
 
 
 @require_POST
-@administrativo_requerido
+@requiere_rol('administrador')  # El operador (administrativo) no puede eliminar.
 def eliminar_docente(request, id):
     docente = get_object_or_404(Docente, id=id)
     docente.delete()
