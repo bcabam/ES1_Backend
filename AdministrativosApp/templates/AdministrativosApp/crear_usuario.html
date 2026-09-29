@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block titulo %}Crear usuario - Colegio Digital{% endblock %}
+{% block encabezado %}Crear usuario{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <form method="post" class="card p-4 shadow-sm" novalidate>
+            {% csrf_token %}
+            {% for campo in formulario %}
+                <div class="mb-3">
+                    <label for="{{ campo.id_for_label }}" class="form-label">{{ campo.label }}</label>
+                    {% if campo.name == 'perfil' %}
+                        <select name="{{ campo.html_name }}" id="{{ campo.id_for_label }}"
+                                class="form-select {% if campo.errors %}is-invalid{% endif %}">
+                            {% for valor, texto in campo.field.choices %}
+                                <option value="{{ valor }}" {% if campo.value == valor %}selected{% endif %}>{{ texto }}</option>
+                            {% endfor %}
+                        </select>
+                    {% else %}
+                        <input type="{{ campo.field.widget.input_type }}" name="{{ campo.html_name }}"
+                               id="{{ campo.id_for_label }}"
+                               value="{% if campo.field.widget.input_type != 'password' %}{{ campo.value|default:'' }}{% endif %}"
+                               class="form-control {% if campo.errors %}is-invalid{% endif %}">
+                    {% endif %}
+                    {% for error in campo.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary w-100">Crear usuario</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

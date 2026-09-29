@@ -10,22 +10,29 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
+from django.contrib.messages import constants as message_constants
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Carga las variables sensibles desde el archivo .env (no se sube a GitHub).
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-8!cyn^(kz2ro@#0n#_=h$3wk&x+&=w7v#gz#eoabbv#%re_#!3'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 
 # Application definition
@@ -64,6 +71,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'AdministrativosApp.context_processors.perfil_usuario',
             ],
         },
     },
@@ -75,10 +83,20 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
+# Base de datos MySQL de WAMP; los datos de conexión vienen del archivo .env.
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST', '127.0.0.1'),
+        'PORT': os.getenv('DB_PORT', '3306'),
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+            # WAMP usa MyISAM por defecto, que no soporta llaves foráneas.
+            'init_command': "SET default_storage_engine=INNODB",
+        },
     }
 }
 
@@ -120,13 +138,14 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# La sesión se almacena firmada en la cookie, sin usar base de datos.
-SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
-
 # Rutas usadas por el sistema de autenticación.
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'listado_docentes'
+LOGIN_REDIRECT_URL = 'inicio_por_perfil'
 LOGOUT_REDIRECT_URL = 'login'
+
+MESSAGE_TAGS = {
+    message_constants.ERROR: 'danger',
+}
 
 
 # Email
