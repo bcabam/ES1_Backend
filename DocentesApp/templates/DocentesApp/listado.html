@@ -25,7 +25,7 @@
             <nav class="nav nav-pills flex-column gap-1">
               <a class="nav-link active" href="#resumen">Resumen del curso</a>
               <a class="nav-link text-dark" href="#estudiantes">Estudiantes</a>
-              <a class="nav-link text-dark" href="#notas">Notas</a>
+              <a class="nav-link text-dark" href="{% url 'notas_docentes' %}{% if curso_seleccionado %}?curso={{ curso_seleccionado|urlencode }}{% endif %}">Notas</a>
               <a class="nav-link text-dark" href="#anotaciones">Anotaciones</a>
               <a class="nav-link text-dark" href="#asistencia">Asistencia</a>
               <a class="nav-link text-dark" href="#evaluaciones">Evaluaciones</a>
@@ -58,25 +58,41 @@
           </div>
           <div class="col-sm-6 col-xl-3">
             <div class="card shadow-sm border-0"><div class="card-body">
-              <p class="text-muted mb-1">Promedio del curso</p><p class="h3 mb-0">{{ promedio_general|default:'—' }}</p>
+              <p class="text-muted mb-1">Promedio del curso</p><p class="h3 mb-0">{{ promedio_general|default:'—'|floatformat:2 }}</p>
             </div></div>
           </div>
         </div>
 
         <div id="estudiantes" class="card shadow-sm border-0">
-          <div class="card-header bg-white py-3"><h2 class="h5 mb-0">Estudiantes, notas y anotaciones</h2></div>
+          <div class="card-header bg-white py-3"><h2 class="h5 mb-0">Notas de estudiantes</h2></div>
           <div class="table-responsive">
             <table class="table table-hover mb-0 align-middle">
-              <thead class="table-primary"><tr><th>Estudiante</th><th id="notas">Promedio</th><th id="anotaciones">Anotaciones</th></tr></thead>
+              <thead class="table-primary"><tr><th>Estudiante</th><th>Asignatura</th><th>Nota</th></tr></thead>
               <tbody>
-                {% for estudiante in estudiantes %}
+                {% for nota in notas_curso %}
                   <tr>
-                    <td>{{ estudiante.nombre }}</td>
-                    <td>{{ estudiante.promedio }}</td>
-                    <td>{% for anotacion in estudiante.anotaciones %}<div>{{ anotacion }}</div>{% empty %}<span class="text-muted">Sin anotaciones</span>{% endfor %}</td>
+                    <td>{{ nota.estudiante.nombre }}</td>
+                    <td>{{ nota.asignatura }}</td>
+                    <td>{{ nota.calificacion|floatformat:2 }}</td>
                   </tr>
                 {% empty %}
-                  <tr><td colspan="3" class="text-center py-4">No hay estudiantes registrados en este curso.</td></tr>
+                  <tr><td colspan="3" class="text-center py-4">No hay notas registradas en este curso.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="anotaciones" class="card shadow-sm border-0 mt-4">
+          <div class="card-header bg-white py-3"><h2 class="h5 mb-0">Anotaciones</h2></div>
+          <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+              <thead class="table-light"><tr><th>Estudiante</th><th>Anotaciones</th></tr></thead>
+              <tbody>
+                {% for estudiante in estudiantes %}
+                  <tr><td>{{ estudiante.nombre }}</td><td class="text-muted">Sin anotaciones</td></tr>
+                {% empty %}
+                  <tr><td colspan="2" class="text-center py-4">No hay estudiantes registrados en este curso.</td></tr>
                 {% endfor %}
               </tbody>
             </table>

@@ -1,25 +1,15 @@
-import json
 import re
-from pathlib import Path
 
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from django.db.models import Q
+from django.db.models import Avg, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from config.autorizacion import requiere_rol
+from EstudiantesApp.models import Estudiante, Nota
 from .models import Docente
-
-
-DATA_DIR = Path(__file__).resolve().parent / 'data'
-
-
-def leer_json(nombre_archivo):
-    """Lee los datos de la aplicación sin utilizar base de datos."""
-    with (DATA_DIR / nombre_archivo).open(encoding='utf-8') as archivo:
-        return json.load(archivo)
 
 
 def normalizar_rut(rut):
@@ -38,59 +28,45 @@ def inicio(request):
 
 @docente_requerido
 def listado_docentes(request):
-    estudiantes = leer_json('estudiantes.json')
-    cursos = sorted({estudiante['curso'] for estudiante in estudiantes})
-    curso_seleccionado = request.GET.get('curso', cursos[0] if cursos else '')
-    estudiantes_curso = [
-        estudiante for estudiante in estudiantes
-        if estudiante['curso'] == curso_seleccionado
-    ]
-    promedio_general = (
-        round(
-            sum(estudiante['promedio'] for estudiante in estudiantes_curso)
-            / len(estudiantes_curso),
-            1,
-        )
-        if estudiantes_curso else None
+    cursos = list(Estudiante.objects.order_by("curso").values_list("curso", flat=True).distinct())
+    curso_seleccionado = request.GET.get("curso", cursos[0] if cursos else "")
+    estudiantes_curso = Estudiante.objects.filter(curso=curso_seleccionado).annotate(
+        promedio=Avg("notas__calificacion")
     )
-    asistencias = [
-        asistencia for asistencia in leer_json('asistencia.json')
-        if asistencia['curso'] == curso_seleccionado
-    ]
-    porcentaje_asistencia = (
-        round(
-            sum(asistencia['porcentaje'] for asistencia in asistencias) / len(asistencias),
-            1,
-        )
-        if asistencias else None
-    )
+    promedio_general = Nota.objects.filter(
+        estudiante__curso=curso_seleccionado
+    ).aggregate(promedio=Avg("calificacion"))["promedio"]
+    notas_curso = Nota.objects.filter(
+        estudiante__curso=curso_seleccionado
+    ).select_related("estudiante")
+    return render(request, "DocentesApp/listado.html", {
+        "estudiantes": estudiantes_curso,
+        "notas_curso": notas_curso,
+        "cursos": cursos,
+        "curso_seleccionado": curso_seleccionado,
+        "cantidad_estudiantes": estudiantes_curso.count(),
+        "promedio_general": promedio_general,
+        "asistencias": [],
+        "porcentaje_asistencia": None,
+        "evaluaciones": [],
+        "materiales": [],
+        "mensajes": [],
+        "docente": {"nombre": request.user.get_full_name() or request.user.username},
+    })
 
-    return render(
-        request,
-        'DocentesApp/listado.html',
-        {
-            'estudiantes': estudiantes_curso,
-            'cursos': cursos,
-            'curso_seleccionado': curso_seleccionado,
-            'cantidad_estudiantes': len(estudiantes_curso),
-            'promedio_general': promedio_general,
-            'asistencias': asistencias,
-            'porcentaje_asistencia': porcentaje_asistencia,
-            'evaluaciones': [
-                evaluacion for evaluacion in leer_json('evaluaciones.json')
-                if evaluacion['curso'] == curso_seleccionado
-            ],
-            'materiales': [
-                material for material in leer_json('materiales.json')
-                if material['curso'] == curso_seleccionado
-            ],
-            'mensajes': [
-                mensaje for mensaje in leer_json('mensajes.json')
-                if mensaje['curso'] == curso_seleccionado
-            ],
-            'docente': {'nombre': request.user.get_full_name() or request.user.username},
-        },
-    )
+
+@docente_requerido
+def notas_docentes(request):
+    curso = request.GET.get("curso", "").strip()
+    notas = Nota.objects.select_related("estudiante", "docente")
+    if curso:
+        notas = notas.filter(estudiante__curso=curso)
+    cursos = Estudiante.objects.order_by("curso").values_list("curso", flat=True).distinct()
+    return render(request, "DocentesApp/notas.html", {
+        "notas": notas,
+        "cursos": cursos,
+        "curso_seleccionado": curso,
+    })
 
 
 @administrativo_requerido
