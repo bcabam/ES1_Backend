@@ -142,7 +142,7 @@ DB_PORT=3306
 ```bash
 python manage.py migrate
 python manage.py crear_perfiles --demo
-python manage.py loaddata funcionarios docentes
+python manage.py loaddata funcionarios docentes estudiantes
 python manage.py collectstatic --noinput
 mkdir -p media
 ```
