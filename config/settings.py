@@ -150,6 +150,9 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Rutas usadas por el sistema de autenticación.
+# El login acepta el nombre de usuario o el correo de la cuenta.
+AUTHENTICATION_BACKENDS = ['AdministrativosApp.backends.UsuarioOCorreoBackend']
+
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'inicio_por_perfil'
 LOGOUT_REDIRECT_URL = 'login'
