@@ -130,6 +130,12 @@ python manage.py runserver
 
 ---
 
+## Despliegue en AWS
+
+La guía para desplegar en AWS EC2 (AWS Academy), con MySQL y phpMyAdmin en la misma instancia, está en [DEPLOY.md](DEPLOY.md).
+
+---
+
 ## Trabajo en equipo
 
 Cada integrante trabaja con **su propia base de datos** en su equipo. Por GitHub se comparte la **estructura** (modelos y migraciones) y los **datos de ejemplo** (fixtures), nunca la base en sí.
