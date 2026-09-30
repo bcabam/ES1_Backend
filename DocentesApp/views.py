@@ -9,6 +9,7 @@ from django.views.decorators.http import require_POST
 
 from config.autorizacion import requiere_rol
 from EstudiantesApp.models import Estudiante, Nota
+from EstudiantesApp.forms import RegistrarNotaForm
 from .models import Docente
 
 
@@ -67,6 +68,33 @@ def notas_docentes(request):
         "cursos": cursos,
         "curso_seleccionado": curso,
     })
+
+
+@docente_requerido
+def editar_nota_docente(request, nota_id):
+    nota = get_object_or_404(Nota, pk=nota_id, docente=request.user)
+    if request.method == "POST":
+        formulario = RegistrarNotaForm(request.POST, instance=nota)
+        if formulario.is_valid():
+            formulario.save()
+            messages.success(request, "La nota se actualizó correctamente.")
+            return redirect("notas_docentes")
+    else:
+        formulario = RegistrarNotaForm(instance=nota)
+    return render(request, "DocentesApp/editar_nota.html", {
+        "formulario": formulario,
+        "nota": nota,
+    })
+
+
+@docente_requerido
+def eliminar_nota_docente(request, nota_id):
+    nota = get_object_or_404(Nota, pk=nota_id, docente=request.user)
+    if request.method == "POST":
+        nota.delete()
+        messages.success(request, "La nota se eliminó correctamente.")
+        return redirect("notas_docentes")
+    return render(request, "DocentesApp/eliminar_nota.html", {"nota": nota})
 
 
 @administrativo_requerido

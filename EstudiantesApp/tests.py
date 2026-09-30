@@ -1,9 +1,11 @@
+from decimal import Decimal
+
 from django.contrib.auth.models import Group, User
 from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Estudiante
+from .models import Estudiante, Nota
 
 
 class NotasEstudianteTests(TestCase):
@@ -14,11 +16,27 @@ class NotasEstudianteTests(TestCase):
         self.estudiante.groups.add(Group.objects.create(name="Estudiante"))
 
     def test_estudiante_ve_sus_notas(self):
+        alumno = Estudiante.objects.create(
+            nombre="Juan Alcachofa",
+            rut="12.345.678-9",
+            curso="1° Medio A",
+            cuenta="juan.alcachofa@example.com",
+            usuario=self.estudiante,
+        )
+        nota = Nota.objects.create(
+            estudiante=alumno,
+            docente=self.estudiante,
+            asignatura="Ciencias",
+            evaluacion="Evaluación diagnóstica",
+            calificacion=Decimal("6.5"),
+        )
         self.client.force_login(self.estudiante)
         respuesta = self.client.get(reverse("estudiantes:notas"))
 
         self.assertContains(respuesta, "Juan Alcachofa")
-        self.assertContains(respuesta, "Matemática")
+        self.assertContains(respuesta, nota.asignatura)
+        self.assertContains(respuesta, nota.evaluacion)
+        self.assertContains(respuesta, "6.5")
 
     def test_notas_requiere_sesion(self):
         respuesta = self.client.get(reverse("estudiantes:notas"))
