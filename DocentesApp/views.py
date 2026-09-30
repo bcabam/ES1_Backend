@@ -1,6 +1,7 @@
 import re
 
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db.models import Avg, Q
@@ -11,6 +12,11 @@ from config.autorizacion import requiere_rol
 from EstudiantesApp.models import Estudiante, Nota
 from EstudiantesApp.forms import RegistrarNotaForm
 from .models import Docente
+
+
+def ficha_docente(usuario):
+    """Ficha del mantenedor Docente enlazada a la cuenta que inició sesión."""
+    return getattr(usuario, 'docente', None)
 
 
 def normalizar_rut(rut):
@@ -52,27 +58,39 @@ def listado_docentes(request):
         "evaluaciones": [],
         "materiales": [],
         "mensajes": [],
-        "docente": {"nombre": request.user.get_full_name() or request.user.username},
+        "docente": {"nombre": getattr(ficha_docente(request.user), 'nombre', None)
+                    or request.user.get_full_name() or request.user.username},
     })
 
 
 @docente_requerido
 def notas_docentes(request):
     curso = request.GET.get("curso", "").strip()
+    busqueda = request.GET.get("q", "").strip()
     notas = Nota.objects.select_related("estudiante", "docente")
     if curso:
         notas = notas.filter(estudiante__curso=curso)
+    if busqueda:
+        notas = notas.filter(
+            Q(estudiante__nombre__icontains=busqueda)
+            | Q(estudiante__rut__icontains=busqueda)
+            | Q(asignatura__icontains=busqueda)
+            | Q(evaluacion__icontains=busqueda)
+        )
     cursos = Estudiante.objects.order_by("curso").values_list("curso", flat=True).distinct()
     return render(request, "DocentesApp/notas.html", {
         "notas": notas,
         "cursos": cursos,
         "curso_seleccionado": curso,
+        "busqueda": busqueda,
+        "mi_ficha": ficha_docente(request.user),
     })
 
 
 @docente_requerido
 def editar_nota_docente(request, nota_id):
-    nota = get_object_or_404(Nota, pk=nota_id, docente=request.user)
+    # Cada docente solo puede modificar las notas que él mismo registró.
+    nota = get_object_or_404(Nota, pk=nota_id, docente__usuario=request.user)
     if request.method == "POST":
         formulario = RegistrarNotaForm(request.POST, instance=nota)
         if formulario.is_valid():
@@ -89,7 +107,8 @@ def editar_nota_docente(request, nota_id):
 
 @docente_requerido
 def eliminar_nota_docente(request, nota_id):
-    nota = get_object_or_404(Nota, pk=nota_id, docente=request.user)
+    # Cada docente solo puede eliminar las notas que él mismo registró.
+    nota = get_object_or_404(Nota, pk=nota_id, docente__usuario=request.user)
     if request.method == "POST":
         nota.delete()
         messages.success(request, "La nota se eliminó correctamente.")
@@ -144,6 +163,26 @@ def _validar_datos_docente(nombre, cuenta, rut, docente_actual=None):
     return None
 
 
+def _cuentas_disponibles(docente_actual=None):
+    """Cuentas del grupo Docente que aún no están enlazadas a otra ficha."""
+    cuentas = User.objects.filter(groups__name='Docente').order_by('first_name', 'username')
+    ocupadas = Docente.objects.exclude(usuario=None)
+    if docente_actual:
+        ocupadas = ocupadas.exclude(pk=docente_actual.pk)
+    return cuentas.exclude(pk__in=ocupadas.values('usuario'))
+
+
+def _cuenta_elegida(request, docente_actual=None):
+    """Devuelve (cuenta, error) según la opción elegida en el formulario."""
+    usuario_id = request.POST.get('usuario', '')
+    if not usuario_id:
+        return None, None
+    cuenta = _cuentas_disponibles(docente_actual).filter(pk=usuario_id).first()
+    if cuenta is None:
+        return None, 'La cuenta elegida no es válida o ya está enlazada a otro docente.'
+    return cuenta, None
+
+
 @administrativo_requerido
 def crear_docente(request):
     if request.method == 'POST':
@@ -151,7 +190,8 @@ def crear_docente(request):
         cuenta = request.POST.get('cuenta', '').strip()
         rut = request.POST.get('rut', '').strip()
 
-        error = _validar_datos_docente(nombre, cuenta, rut)
+        cuenta_acceso, error_cuenta = _cuenta_elegida(request)
+        error = _validar_datos_docente(nombre, cuenta, rut) or error_cuenta
         if error:
             return render(
                 request,
@@ -161,13 +201,15 @@ def crear_docente(request):
                     'nombre': nombre,
                     'cuenta': cuenta,
                     'rut': rut,
+                    'cuentas': _cuentas_disponibles(),
+                    'usuario_id': request.POST.get('usuario', ''),
                 },
             )
-        Docente.objects.create(nombre=nombre, cuenta=cuenta, rut=rut)
+        Docente.objects.create(nombre=nombre, cuenta=cuenta, rut=rut, usuario=cuenta_acceso)
         messages.success(request, 'Docente creado correctamente.')
         return redirect('listar_docentes')
 
-    return render(request, 'docentes/crear.html')
+    return render(request, 'docentes/crear.html', {'cuentas': _cuentas_disponibles()})
 
 
 @administrativo_requerido
@@ -179,7 +221,8 @@ def editar_docente(request, id):
         cuenta = request.POST.get('cuenta', '').strip()
         rut = request.POST.get('rut', '').strip()
 
-        error = _validar_datos_docente(nombre, cuenta, rut, docente)
+        cuenta_acceso, error_cuenta = _cuenta_elegida(request, docente)
+        error = _validar_datos_docente(nombre, cuenta, rut, docente) or error_cuenta
         if error:
             docente.nombre = nombre
             docente.cuenta = cuenta
@@ -187,16 +230,21 @@ def editar_docente(request, id):
             return render(
                 request,
                 'docentes/editar.html',
-                {'docente': docente, 'error': error},
+                {'docente': docente, 'error': error, 'cuentas': _cuentas_disponibles(docente)},
             )
         docente.nombre = nombre
         docente.cuenta = cuenta
         docente.rut = rut
+        docente.usuario = cuenta_acceso
         docente.save()
         messages.success(request, 'Datos del docente actualizados correctamente.')
         return redirect('listar_docentes')
 
-    return render(request, 'docentes/editar.html', {'docente': docente})
+    return render(
+        request,
+        'docentes/editar.html',
+        {'docente': docente, 'cuentas': _cuentas_disponibles(docente)},
+    )
 
 
 @require_POST

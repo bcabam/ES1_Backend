@@ -16,9 +16,21 @@
         <label class="form-label" for="cuenta">Cuenta institucional</label>
         <input class="form-control" type="email" id="cuenta" name="cuenta" value="{{ cuenta|default:'' }}" maxlength="254" required>
       </div>
-      <div class="mb-4">
+      <div class="mb-3">
         <label class="form-label" for="rut">RUT</label>
         <input class="form-control" type="text" id="rut" name="rut" value="{{ rut|default:'' }}" maxlength="12" required>
+      </div>
+      <div class="mb-4">
+        <label class="form-label" for="usuario">Cuenta de acceso del docente (opcional)</label>
+        <select class="form-select" id="usuario" name="usuario">
+          <option value="">Sin cuenta enlazada</option>
+          {% for cuenta_opcion in cuentas %}
+            <option value="{{ cuenta_opcion.pk }}" {% if cuenta_opcion.pk|stringformat:'s' == usuario_id %}selected{% endif %}>
+              {{ cuenta_opcion.get_full_name|default:cuenta_opcion.username }} ({{ cuenta_opcion.username }})
+            </option>
+          {% endfor %}
+        </select>
+        <div class="form-text">Enlaza la ficha con la cuenta con que el docente registra notas.</div>
       </div>
       <button class="btn btn-primary" type="submit">Guardar</button>
       <a class="btn btn-outline-secondary" href="{% url 'listar_docentes' %}">Volver al listado</a>

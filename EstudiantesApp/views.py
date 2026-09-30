@@ -10,26 +10,39 @@ from .models import Estudiante, Nota
 @requiere_rol("estudiante")
 def notas(request):
     nombre_usuario = request.user.get_full_name() or request.user.username
+    busqueda = request.GET.get("q", "").strip()
     try:
         estudiante = request.user.estudiante
         notas_estudiante = Nota.objects.filter(estudiante=estudiante).select_related("docente")
     except Estudiante.DoesNotExist:
         notas_estudiante = Nota.objects.none()
+    if busqueda:
+        notas_estudiante = notas_estudiante.filter(
+            Q(asignatura__icontains=busqueda) | Q(evaluacion__icontains=busqueda)
+        )
 
     return render(
         request,
         "estudiantes/notas.html",
-        {"notas": notas_estudiante, "nombre_usuario": nombre_usuario},
+        {"notas": notas_estudiante, "nombre_usuario": nombre_usuario, "busqueda": busqueda},
     )
 
 
 @requiere_rol("docente")
 def registrar_nota(request):
+    docente = getattr(request.user, "docente", None)
+    if docente is None:
+        messages.error(
+            request,
+            "Tu cuenta no está enlazada a una ficha de docente. Pide al administrativo que la enlace.",
+        )
+        return redirect("inicio_por_perfil")
+
     if request.method == "POST":
         formulario = RegistrarNotaForm(request.POST)
         if formulario.is_valid():
             nota = formulario.save(commit=False)
-            nota.docente = request.user
+            nota.docente = docente
             nota.save()
             messages.success(request, "La nota se registró correctamente.")
             return redirect("estudiantes:registrar_nota")

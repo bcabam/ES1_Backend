@@ -114,8 +114,10 @@ pip install -r requirements.txt
 ```powershell
 python manage.py migrate
 python manage.py crear_perfiles --demo
-python manage.py loaddata funcionarios docentes
+python manage.py loaddata funcionarios docentes estudiantes
 ```
+
+`crear_perfiles --demo` debe ir **antes** de `loaddata`: el fixture de estudiantes enlaza a Juan González con la cuenta `estudiante`, y el comando enlaza la cuenta `docente` con su ficha de Docente. Así el flujo completo (el docente registra una nota → el estudiante la ve) funciona apenas se instala.
 
 ### 7. Ejecutar
 
