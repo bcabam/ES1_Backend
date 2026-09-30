@@ -1,0 +1,52 @@
+[
+    {
+        "model": "EstudiantesApp.estudiante",
+        "pk": 101,
+        "fields": {
+            "nombre": "Juan González",
+            "rut": "20.111.111-1",
+            "curso": "4° Medio A",
+            "cuenta": "juan.gonzalez@colegiodigital.cl",
+            "foto": "",
+            "usuario": [
+                "estudiante"
+            ]
+        }
+    },
+    {
+        "model": "EstudiantesApp.estudiante",
+        "pk": 102,
+        "fields": {
+            "nombre": "Camila Rojas",
+            "rut": "20.222.222-2",
+            "curso": "4° Medio A",
+            "cuenta": "camila.rojas@colegiodigital.cl",
+            "foto": "",
+            "usuario": null
+        }
+    },
+    {
+        "model": "EstudiantesApp.estudiante",
+        "pk": 103,
+        "fields": {
+            "nombre": "Diego Pérez",
+            "rut": "20.333.333-3",
+            "curso": "4° Medio A",
+            "cuenta": "diego.perez@colegiodigital.cl",
+            "foto": "",
+            "usuario": null
+        }
+    },
+    {
+        "model": "EstudiantesApp.estudiante",
+        "pk": 104,
+        "fields": {
+            "nombre": "Sofía Morales",
+            "rut": "20.444.444-4",
+            "curso": "4° Medio B",
+            "cuenta": "sofia.morales@colegiodigital.cl",
+            "foto": "",
+            "usuario": null
+        }
+    }
+]

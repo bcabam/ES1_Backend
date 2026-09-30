@@ -36,6 +36,7 @@
                 <th>RUT</th>
                 <th>Curso</th>
                 <th>Cuenta</th>
+                <th>Ficha</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -53,6 +54,13 @@
                 <td>{{ estudiante.rut }}</td>
                 <td>{{ estudiante.curso }}</td>
                 <td>{{ estudiante.cuenta }}</td>
+                <td>
+                    {% if estudiante.ficha_matricula %}
+                        <a href="{{ estudiante.ficha_matricula.url }}" target="_blank" class="btn btn-sm btn-outline-primary">Ver PDF</a>
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
                 <td>
                     <a
                         href="{% url 'estudiantes:editar_estudiante' estudiante.id %}"
@@ -73,7 +81,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="6" class="text-center">
+                <td colspan="7" class="text-center">
                     No se encontraron estudiantes.
                 </td>
             </tr>

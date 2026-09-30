@@ -1,5 +1,9 @@
 from django.conf import settings
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import (
+    FileExtensionValidator,
+    MaxValueValidator,
+    MinValueValidator,
+)
 from django.db import models
 
 
@@ -9,6 +13,12 @@ class Estudiante(models.Model):
     curso = models.CharField(max_length=50)
     cuenta = models.EmailField(unique=True)
     foto = models.ImageField(upload_to="estudiantes/fotos/", blank=True)
+    ficha_matricula = models.FileField(
+        "ficha de matrícula (PDF)",
+        upload_to="estudiantes/fichas/",
+        blank=True,
+        validators=[FileExtensionValidator(["pdf"])],
+    )
     usuario = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -30,8 +40,9 @@ class Nota(models.Model):
         on_delete=models.CASCADE,
         related_name="notas",
     )
+    # La nota relaciona los dos mantenedores: Estudiante y Docente.
     docente = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        "DocentesApp.Docente",
         on_delete=models.PROTECT,
         related_name="notas_ingresadas",
     )

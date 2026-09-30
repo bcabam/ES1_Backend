@@ -7,7 +7,7 @@ from .models import Estudiante, Nota
 class EstudianteForm(forms.ModelForm):
     class Meta:
         model = Estudiante
-        fields = ["nombre", "rut", "curso", "cuenta", "foto", "usuario"]
+        fields = ["nombre", "rut", "curso", "cuenta", "foto", "ficha_matricula", "usuario"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

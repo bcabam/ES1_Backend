@@ -1,6 +1,8 @@
 from django.contrib.auth.models import Group, Permission, User
 from django.core.management.base import BaseCommand
 
+from DocentesApp.models import Docente
+
 from config.autorizacion import GRUPOS_POR_PERFIL
 
 
@@ -97,3 +99,13 @@ class Command(BaseCommand):
             usuario.save()
             usuario.groups.set([Group.objects.get(name=nombre_grupo)])
             self.stdout.write(f'Usuario de prueba: {usuario_nombre} / {CLAVE_DEMO} ({nombre_grupo})')
+
+        # El docente de prueba necesita una ficha del mantenedor Docente para registrar notas.
+        docente_demo = User.objects.get(username='docente')
+        ficha, _ = Docente.objects.get_or_create(
+            cuenta=docente_demo.email,
+            defaults={'nombre': docente_demo.get_full_name(), 'rut': '15.555.555-5'},
+        )
+        ficha.usuario = docente_demo
+        ficha.save()
+        self.stdout.write(f'Ficha docente "{ficha.nombre}" enlazada a la cuenta docente')
