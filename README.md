@@ -48,6 +48,8 @@ Usuarios de prueba (se crean con `crear_perfiles --demo`), todos con la clave **
 
 `admin` · `administrativo` · `docente` · `estudiante`
 
+Se puede ingresar con el **nombre de usuario** o con el **correo** de la cuenta (por ejemplo `docente@colegiodigital.cl`). Por eso, al crear usuarios no se permite repetir un correo.
+
 > Solo para desarrollo. En el servidor de producción se deben crear usuarios con contraseñas propias.
 
 ---

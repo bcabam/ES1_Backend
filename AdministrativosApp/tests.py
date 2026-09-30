@@ -33,7 +33,45 @@ class LoginUnicoTests(TestCase):
         respuesta = self.client.post(
             reverse('login'), {'username': 'docente', 'password': 'incorrecta'}
         )
-        self.assertContains(respuesta, 'Usuario o contraseña incorrectos.')
+        self.assertContains(respuesta, 'Usuario, correo o contraseña incorrectos.')
+
+    def test_ingresa_con_correo(self):
+        respuesta = self.client.post(
+            reverse('login'),
+            {'username': 'Docente@ColegioDigital.cl', 'password': 'Colegio2026!'},
+        )
+        self.assertRedirects(
+            respuesta, reverse('inicio_por_perfil'), fetch_redirect_response=False
+        )
+        self.assertEqual(self.client.session['_auth_user_id'], str(User.objects.get(username='docente').pk))
+
+    def test_correo_con_clave_incorrecta_no_ingresa(self):
+        respuesta = self.client.post(
+            reverse('login'),
+            {'username': 'docente@colegiodigital.cl', 'password': 'incorrecta'},
+        )
+        self.assertContains(respuesta, 'Usuario, correo o contraseña incorrectos.')
+
+    def test_correo_repetido_no_ingresa(self):
+        User.objects.create_user(
+            'otra.cuenta', email='docente@colegiodigital.cl', password='Colegio2026!'
+        )
+        respuesta = self.client.post(
+            reverse('login'),
+            {'username': 'docente@colegiodigital.cl', 'password': 'Colegio2026!'},
+        )
+        self.assertNotIn('_auth_user_id', self.client.session)
+        self.assertEqual(respuesta.status_code, 200)
+
+    def test_crear_usuario_rechaza_correo_repetido(self):
+        self.ingresar('admin')
+        respuesta = self.client.post(reverse('administrativos:crear_usuario'), {
+            'username': 'repetido', 'first_name': 'Otro', 'last_name': 'Usuario',
+            'email': 'DOCENTE@colegiodigital.cl', 'perfil': 'docente',
+            'password1': 'ClaveSegura2026!', 'password2': 'ClaveSegura2026!',
+        })
+        self.assertFalse(User.objects.filter(username='repetido').exists())
+        self.assertContains(respuesta, 'Ya existe una cuenta con ese correo.')
 
     def test_cada_perfil_llega_a_su_inicio(self):
         destinos = {

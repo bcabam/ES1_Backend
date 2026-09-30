@@ -21,6 +21,13 @@ class CrearUsuarioForm(UserCreationForm):
         fields = ['username', 'first_name', 'last_name', 'email']
         labels = {'username': 'Usuario'}
 
+    def clean_email(self):
+        # El correo también sirve para iniciar sesión, por eso no puede repetirse.
+        email = self.cleaned_data['email'].strip().lower()
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError('Ya existe una cuenta con ese correo.')
+        return email
+
     def save(self, commit=True):
         usuario = super().save(commit=False)
         usuario.is_staff = self.cleaned_data['perfil'] == 'administrador'
