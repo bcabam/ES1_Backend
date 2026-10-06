@@ -8,6 +8,9 @@ from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
+from DocentesApp.models import Docente
+from EstudiantesApp.models import Estudiante
+
 from .models import Administrativo
 
 
@@ -115,6 +118,61 @@ class LoginUnicoTests(TestCase):
         })
         nuevo = User.objects.get(username='nuevo.docente')
         self.assertTrue(nuevo.groups.filter(name='Docente').exists())
+
+    def test_crear_cuenta_desde_ficha_docente_la_enlaza(self):
+        ficha = Docente.objects.create(
+            nombre='Jorge Pavez', cuenta='jorge.p@colegiovirtual.cl', rut='13.281.663-8'
+        )
+        self.ingresar('admin')
+
+        # Al llegar desde el listado, los datos vienen completos desde la ficha.
+        respuesta = self.client.get(
+            reverse('administrativos:crear_usuario'), {'ficha': f'docente:{ficha.pk}'}
+        )
+        self.assertContains(respuesta, 'value="jorge.p"')
+        self.assertContains(respuesta, 'value="jorge.p@colegiovirtual.cl"')
+
+        self.client.post(reverse('administrativos:crear_usuario'), {
+            'ficha': f'docente:{ficha.pk}', 'perfil': 'docente',
+            'username': 'jorge.p', 'first_name': 'Jorge', 'last_name': 'Pavez',
+            'email': 'jorge.p@colegiovirtual.cl',
+            'password1': 'ClaveSegura2026!', 'password2': 'ClaveSegura2026!',
+        })
+        ficha.refresh_from_db()
+        self.assertEqual(ficha.usuario.username, 'jorge.p')
+        self.assertTrue(ficha.usuario.groups.filter(name='Docente').exists())
+
+        # Con la cuenta enlazada, el docente ya puede ingresar y registrar notas.
+        self.client.post(reverse('logout'))
+        self.client.post(reverse('login'), {'username': 'jorge.p', 'password': 'ClaveSegura2026!'})
+        self.assertEqual(
+            self.client.get(reverse('estudiantes:registrar_nota')).status_code, 200
+        )
+
+    def test_ficha_y_perfil_deben_coincidir(self):
+        ficha = Estudiante.objects.create(
+            nombre='Camila Rojas', rut='20.222.222-2', curso='4° Medio A',
+            cuenta='camila.rojas@colegiodigital.cl',
+        )
+        self.ingresar('admin')
+        respuesta = self.client.post(reverse('administrativos:crear_usuario'), {
+            'ficha': f'estudiante:{ficha.pk}', 'perfil': 'docente',
+            'username': 'camila.rojas', 'first_name': 'Camila', 'last_name': 'Rojas',
+            'email': 'camila.rojas@colegiodigital.cl',
+            'password1': 'ClaveSegura2026!', 'password2': 'ClaveSegura2026!',
+        })
+        self.assertContains(respuesta, 'solo se puede enlazar con el perfil Estudiante')
+        self.assertFalse(User.objects.filter(username='camila.rojas').exists())
+
+    def test_boton_crear_cuenta_solo_para_fichas_sin_cuenta(self):
+        sin_cuenta = Docente.objects.create(
+            nombre='Sin Cuenta', cuenta='sin.cuenta@colegiodigital.cl', rut='17.777.777-7'
+        )
+        self.ingresar('admin')
+        respuesta = self.client.get(reverse('listar_docentes'))
+        self.assertContains(respuesta, f'?ficha=docente:{sin_cuenta.pk}')
+        con_cuenta = Docente.objects.get(usuario__username='docente')
+        self.assertNotContains(respuesta, f'?ficha=docente:{con_cuenta.pk}"')
 
     def test_menu_cambia_segun_perfil(self):
         self.ingresar('estudiante')
