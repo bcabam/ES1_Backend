@@ -69,6 +69,15 @@
                         Editar
                     </a>
 
+                    {% if perfil == 'administrador' and not estudiante.usuario_id %}
+                    <a
+                        href="{% url 'administrativos:crear_usuario' %}?ficha=estudiante:{{ estudiante.id }}"
+                        class="btn btn-success btn-sm"
+                    >
+                        Crear cuenta
+                    </a>
+                    {% endif %}
+
                     {% if perfil == 'administrador' %}
                     <a
                         href="{% url 'estudiantes:eliminar_estudiante' estudiante.id %}"

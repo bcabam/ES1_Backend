@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.shortcuts import redirect, render
 
 from config.autorizacion import RUTAS_INICIO, perfil_de, requiere_rol
-from .forms import CrearUsuarioForm
+from .forms import CrearUsuarioForm, datos_desde_ficha
 from .models import Administrativo
 
 
@@ -63,10 +63,14 @@ def crear_usuario(request):
         formulario = CrearUsuarioForm(request.POST)
         if formulario.is_valid():
             usuario = formulario.save()
-            messages.success(request, f'Usuario "{usuario.username}" creado correctamente.')
+            mensaje = f'Usuario "{usuario.username}" creado correctamente.'
+            if formulario.ficha_elegida:
+                mensaje += f' Quedó enlazado con la ficha de {formulario.ficha_elegida.nombre}.'
+            messages.success(request, mensaje)
             return redirect('administrativos:crear_usuario')
         messages.error(request, 'Revisa los datos del formulario.')
     else:
-        formulario = CrearUsuarioForm()
+        # Desde los listados se puede llegar con ?ficha=docente:7 para prellenar los datos.
+        formulario = CrearUsuarioForm(initial=datos_desde_ficha(request.GET.get('ficha')))
 
     return render(request, 'AdministrativosApp/crear_usuario.html', {'formulario': formulario})

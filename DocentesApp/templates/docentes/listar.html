@@ -37,6 +37,9 @@
             <td>{{ docente.rut }}</td>
             <td class="text-nowrap">
               <a class="btn btn-sm btn-outline-primary" href="{% url 'editar_docente' docente.id %}">Editar</a>
+              {% if perfil == 'administrador' and not docente.usuario_id %}
+                <a class="btn btn-sm btn-outline-success" href="{% url 'administrativos:crear_usuario' %}?ficha=docente:{{ docente.id }}">Crear cuenta</a>
+              {% endif %}
               {% if perfil == 'administrador' %}
                 <form class="d-inline" method="post" action="{% url 'eliminar_docente' docente.id %}" onsubmit="return confirm('¿Seguro que deseas eliminar a este docente?');">
                   {% csrf_token %}

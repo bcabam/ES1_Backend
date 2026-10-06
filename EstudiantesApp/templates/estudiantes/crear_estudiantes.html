@@ -79,7 +79,7 @@
                 {{ form.usuario.label }} (opcional)
             </label>
             {{ form.usuario }}
-            <div class="form-text">Enlaza la ficha con la cuenta con que el estudiante ve sus notas.</div>
+            <div class="form-text">Enlaza la ficha con la cuenta con que el estudiante ve sus notas. Si la lista está vacía, el administrador debe crear la cuenta en "Crear usuario".</div>
             {% for error in form.usuario.errors %}
                 <div class="text-danger">{{ error }}</div>
             {% endfor %}
