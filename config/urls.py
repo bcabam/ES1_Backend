@@ -19,11 +19,28 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+from AdministrativosApp import api as administrativos_api
 from AdministrativosApp import views as administrativos_views
+
+# Rutas de la API REST (JSON, protegidas con JWT).
+api_urlpatterns = [
+    path('token/', administrativos_api.ObtenerTokenView.as_view(), name='token'),
+    path('token/refresh/', administrativos_api.RenovarTokenView.as_view(), name='token_refresh'),
+    path('perfil/', administrativos_api.MiPerfilView.as_view(), name='mi_perfil'),
+    # Endpoints de cada aplicación (cada app define los suyos en su api_urls.py).
+    path('', include('AdministrativosApp.api_urls')),
+    path('', include('DocentesApp.api_urls')),
+    path('', include('EstudiantesApp.api_urls')),
+    # Documentación: esquema OpenAPI y Swagger UI.
+    path('schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger'),
+]
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/', include(api_urlpatterns)),
     # Login único para todos los perfiles (Django Authentication).
     path(
         'login/',
@@ -45,6 +62,10 @@ urlpatterns = [
         include(('EstudiantesApp.urls', 'estudiantes'), namespace='estudiantes'),
     ),
 ]
+
+# Errores 404 y 500 en JSON cuando la ruta es de la API.
+handler404 = 'config.api.pagina_no_encontrada'
+handler500 = 'config.api.error_del_servidor'
 
 # En desarrollo, Django sirve las fotos y documentos subidos.
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

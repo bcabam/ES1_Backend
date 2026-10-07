@@ -132,6 +132,12 @@ python manage.py runserver
 
 ---
 
+## API REST
+
+El proyecto expone una API RESTful con **Django REST Framework**, autenticación **JWT** (SimpleJWT) y documentación **Swagger** en `/api/docs/`. La guía de uso y cómo agregar endpoints está en [API.md](API.md).
+
+---
+
 ## Despliegue en AWS
 
 La guía para desplegar en AWS EC2 (AWS Academy), con MySQL y phpMyAdmin en la misma instancia, está en [DEPLOY.md](DEPLOY.md).
