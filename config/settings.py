@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -49,6 +50,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # API REST: Django REST Framework, tokens JWT y documentación Swagger/OpenAPI.
+    'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
+    'drf_spectacular',
     'AdministrativosApp', #App de administrativos de colegio
     'DocentesApp',
     'EstudiantesApp',
@@ -159,6 +164,61 @@ LOGOUT_REDIRECT_URL = 'login'
 
 MESSAGE_TAGS = {
     message_constants.ERROR: 'danger',
+}
+
+
+# API REST (Django REST Framework)
+# https://www.django-rest-framework.org/api-guide/settings/
+
+REST_FRAMEWORK = {
+    # La API se autentica solo con tokens JWT (encabezado "Authorization: Bearer <token>").
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    # Seguro por defecto: todo endpoint exige token salvo que se indique lo contrario.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    # Todas las respuestas en JSON.
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+# Tokens JWT (SimpleJWT)
+# https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
+
+SIMPLE_JWT = {
+    # Access token de vida corta: si alguien lo roba, sirve por poco tiempo.
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    # Refresh token para pedir un nuevo access token sin volver a ingresar la clave.
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    # Cada renovación entrega un refresh nuevo e invalida el anterior (lista negra).
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# Documentación Swagger/OpenAPI (drf-spectacular)
+# https://drf-spectacular.readthedocs.io/en/latest/settings.html
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API Colegio Digital',
+    'DESCRIPTION': (
+        'API RESTful de Colegio Digital: docentes, estudiantes, notas y funcionarios. '
+        'Para usar los endpoints protegidos, obtén un token en /api/token/ y '
+        'presiona "Authorize" escribiendo solo el access token.'
+    ),
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # Separa los campos que se envían de los que se reciben (más claro en Swagger).
+    'COMPONENT_SPLIT_REQUEST': True,
+    # Mantiene el token autorizado aunque se recargue la página de Swagger.
+    'SWAGGER_UI_SETTINGS': {'persistAuthorization': True},
 }
 
 
