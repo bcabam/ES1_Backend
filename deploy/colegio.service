@@ -14,8 +14,10 @@ WorkingDirectory=/home/ubuntu/ES1_Backend
 # Antes de arrancar, actualiza la IP pública en el .env.
 ExecStartPre=/bin/bash /home/ubuntu/ES1_Backend/deploy/actualizar_ip.sh
 ExecStart=/home/ubuntu/ES1_Backend/venv/bin/gunicorn config.wsgi:application \
-    --bind 127.0.0.1:8000 --workers 2
-Restart=on-failure
+    --bind 127.0.0.1:8000 --workers 2 --timeout 60 --max-requests 500
+# Si el proceso se cae (por ejemplo, por falta de memoria), vuelve a arrancar.
+Restart=always
+RestartSec=3
 
 [Install]
 WantedBy=multi-user.target
