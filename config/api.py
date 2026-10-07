@@ -4,7 +4,8 @@ import logging
 
 from django.http import JsonResponse
 from django.views import defaults
-from rest_framework import status
+from drf_spectacular.utils import OpenApiResponse
+from rest_framework import serializers, status
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
@@ -113,6 +114,29 @@ def manejador_errores(exc, context):
         cuerpo['detalle'] = datos
     respuesta.data = cuerpo
     return respuesta
+
+
+class ErrorSerializer(serializers.Serializer):
+    """Formato de los errores de la API (solo para la documentación de Swagger)."""
+
+    error = serializers.CharField(help_text='Mensaje descriptivo del problema.')
+    codigo = serializers.IntegerField(help_text='Código HTTP de la respuesta.')
+    detalle = serializers.DictField(required=False, help_text='Errores por campo, si los hay.')
+
+
+def respuestas_error(*codigos):
+    """Respuestas de error para documentar un endpoint en Swagger: respuestas_error(400, 401)."""
+    return {
+        codigo: OpenApiResponse(ErrorSerializer, description=MENSAJES_POR_CODIGO[codigo])
+        for codigo in codigos
+    }
+
+
+def validar_tamano_archivo(archivo, maximo_mb):
+    """Rechaza archivos más grandes que maximo_mb (evita llenar el disco del servidor)."""
+    if archivo and archivo.size > maximo_mb * 1024 * 1024:
+        raise serializers.ValidationError(f'El archivo no puede superar los {maximo_mb} MB.')
+    return archivo
 
 
 def _es_api(request):

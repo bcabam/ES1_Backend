@@ -29,6 +29,10 @@ api_urlpatterns = [
     path('token/', administrativos_api.ObtenerTokenView.as_view(), name='token'),
     path('token/refresh/', administrativos_api.RenovarTokenView.as_view(), name='token_refresh'),
     path('perfil/', administrativos_api.MiPerfilView.as_view(), name='mi_perfil'),
+    # Endpoints de cada aplicación (cada app define los suyos en su api_urls.py).
+    path('', include('AdministrativosApp.api_urls')),
+    path('', include('DocentesApp.api_urls')),
+    path('', include('EstudiantesApp.api_urls')),
     # Documentación: esquema OpenAPI y Swagger UI.
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger'),
