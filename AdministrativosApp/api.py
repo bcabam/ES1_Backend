@@ -1,6 +1,7 @@
 from drf_spectacular.utils import OpenApiExample, extend_schema, inline_serializer
 from rest_framework import serializers
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
@@ -23,7 +24,9 @@ from config.autorizacion import perfil_de
     ],
 )
 class ObtenerTokenView(TokenObtainPairView):
-    pass
+    # Máximo 10 intentos por minuto desde una misma IP (protección contra fuerza bruta).
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'token'
 
 
 @extend_schema(

@@ -59,5 +59,9 @@ urlpatterns = [
     ),
 ]
 
+# Errores 404 y 500 en JSON cuando la ruta es de la API.
+handler404 = 'config.api.pagina_no_encontrada'
+handler500 = 'config.api.error_del_servidor'
+
 # En desarrollo, Django sirve las fotos y documentos subidos.
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

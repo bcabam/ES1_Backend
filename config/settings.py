@@ -186,6 +186,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    # Errores siempre en JSON con el mismo formato y sin datos internos (config/api.py).
+    'EXCEPTION_HANDLER': 'config.api.manejador_errores',
+    # Límite de intentos en el login de la API para frenar ataques de fuerza bruta.
+    'DEFAULT_THROTTLE_RATES': {'token': '10/minute'},
 }
 
 # Tokens JWT (SimpleJWT)
