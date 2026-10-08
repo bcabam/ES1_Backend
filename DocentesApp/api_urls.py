@@ -8,6 +8,10 @@ Ejemplo:
 
 from rest_framework.routers import SimpleRouter
 
+from .api import DocenteViewSet, NotaViewSet
+
 router = SimpleRouter()
+router.register('docentes', DocenteViewSet, basename='api-docentes')
+router.register('notas', NotaViewSet, basename='api-notas')
 
 urlpatterns = router.urls
